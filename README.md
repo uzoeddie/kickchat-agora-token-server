@@ -1,0 +1,1 @@
+## This project creates an agora token to be used with agora flutter sdk.
