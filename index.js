@@ -5,6 +5,8 @@ const admin = require('firebase-admin');
 const cors = require('cors')
 const fs = require('fs');
 const helmet = require("helmet");
+const favicon = require('serve-favicon');
+const path = require('path');
 
 const PORT = 8080;
 
@@ -30,17 +32,21 @@ if(process.env.NODE_ENV === 'development') {
 }
 
 const app = express();
+app.use(favicon(path.join(__dirname, 'public/img', 'favicon.ico')));
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
 app.use(cors());
 app.use(helmet());
 app.use(express.json({}));
 app.use(express.urlencoded({ extended: true }));
 
-
+const index = require('./controllers/indexCtrl');
 const accessToken = require('./routes/access-token');
 const validateEmail = require('./routes/validate-email');
 const topicPushNotification = require('./routes/topic-push-notification');
 const health = require('./routes/health');
 
+app.use('/', index);
 app.use('/', accessToken);
 app.use('/', validateEmail);
 app.use('/', topicPushNotification);
