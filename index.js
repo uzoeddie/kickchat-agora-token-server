@@ -1,67 +1,65 @@
 require('dotenv').config();
 
 const express = require('express');
-const emailValidator = require('deep-email-validator');
-const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
+const admin = require('firebase-admin');
+const cors = require('cors')
+const fs = require('fs');
+const helmet = require("helmet");
 
 const PORT = 8080;
-const APP_ID = process.env.AGORA_APP_ID;
-const APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE;
+
+if(process.env.NODE_ENV === 'development') {
+    const serviceAccount = require('./config/kickchatdev-service-account.json');
+    adminInitializeApp(serviceAccount);
+} else {
+    let serviceData = {
+        "type": process.env.TYPE,
+        "project_id": process.env.PROJECT_ID,
+        "private_key_id": process.env.PRIVATE_KEY_ID,
+        "private_key": process.env.PRIVATE_KEY,
+        "client_email": process.env.CLIENT_EMAIL,
+        "client_id": process.env.CLIENT_ID,
+        "auth_uri": process.env.AUTH_URI,
+        "token_uri": process.env.TOKEN_URI,
+        "auth_provider_x509_cert_url": process.env.AUTH_PROVIDER_X509_CERT_URL,
+        "client_x509_cert_url": process.env.CLIENT_X509_CERT_URL
+    };
+    fs.writeFileSync('./config/kickchat-service-account.json', JSON.stringify(serviceData), 'utf8');
+    const serviceAccountData = require('./config/kickchat-service-account.json');
+    adminInitializeApp(serviceAccountData);
+}
 
 const app = express();
-
-const nocache = (req, resp, next) => {
-  resp.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-  resp.header('Expires', '-1');
-  resp.header('Pragma', 'no-cache');
-  next();
-};
-
-const generateAccessToken = (req, resp) => {
-    resp.header('Acess-Control-Allow-Origin', '*');
-
-    const channelName = req.query.channelName;
-    if (!channelName) {
-        return resp.status(500).json({ error: 'channel is required' });
-    }
-
-    let uid = req.query.uid;
-    if (!uid || uid == '') {
-        uid = 0;
-    }
-
-    let role = RtcRole.SUBSCRIBER;
-    if (req.query.role == 'publisher') {
-        role = RtcRole.PUBLISHER;
-    }
-
-    let expireTime = req.query.expireTime;
-    if (!expireTime || expireTime == '') {
-        expireTime = 7200; // 2 hours
-    } else {
-        expireTime = parseInt(expireTime, 10);
-    }
-
-    const currentTime = Math.floor(Date.now() / 1000);
-    const privilegeExpireTime = currentTime + expireTime;
-    const token = RtcTokenBuilder.buildTokenWithUid(
-        APP_ID,
-        APP_CERTIFICATE,
-        channelName,
-        uid,
-        role,
-        privilegeExpireTime,
-    );
-    return resp.json({ token: token });
-};
+app.use(cors());
+app.use(helmet());
+app.use(express.json({}));
+app.use(express.urlencoded({ extended: true }));
 
 
-app.get('/access_token', nocache, generateAccessToken);
-app.get('/validate_email', nocache, async (req, res) => {
-    const response = await emailValidator.validate(req.query.email);
-    return res.json(response);
+const accessToken = require('./routes/access-token');
+const validateEmail = require('./routes/validate-email');
+const topicPushNotification = require('./routes/topic-push-notification');
+const health = require('./routes/health');
+
+app.use('/', accessToken);
+app.use('/', validateEmail);
+app.use('/', topicPushNotification);
+app.use('/', health);
+
+app.use((error, req, res, next) => {
+    console.error('Error: ', error)
+   
+    res.status(500).json(error);   
 });
 
 app.listen(PORT, () => {
+    console.log(process.env.SERVICE_ACCOUNT);
     console.log(`Listening on port: ${PORT}`);
 });
+
+function adminInitializeApp(serviceAccountJson) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccountJson), 
+        databaseURL: 'https://kickchat-dev.firebaseio.com'
+    });
+}
