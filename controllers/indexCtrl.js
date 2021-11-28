@@ -6,11 +6,11 @@ router.get('/', (req, res) => {
 });
 
 router.get('/terms-of-service', (req, res) => {
-    res.sendFile('terms.html', { root: './views' });
+    res.render('terms');
 });
 
 router.get('/privacy-policy', (req, res) => {
-    res.sendFile('privacy.html', { root: './views' });
+    res.render('privacy');
 });
 
 module.exports = router;
