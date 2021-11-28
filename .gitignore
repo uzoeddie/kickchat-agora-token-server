@@ -1,5 +1,4 @@
 node_modules/
 .env
 api.http
-config/kickchatdev-service-account.json
-!config
+kickchatdev-service-account.json
