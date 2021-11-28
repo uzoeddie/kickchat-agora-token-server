@@ -40,7 +40,7 @@ app.use(helmet());
 app.use(express.json({}));
 app.use(express.urlencoded({ extended: true }));
 
-const index = require('./api/controllers/indexCtrl');
+const index = require('./controllers/indexCtrl');
 const accessToken = require('./routes/access-token');
 const validateEmail = require('./routes/validate-email');
 const topicPushNotification = require('./routes/topic-push-notification');
