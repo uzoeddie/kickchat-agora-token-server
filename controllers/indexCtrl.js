@@ -2,15 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.render('/var/task/views/index');
+    res.render('index');
 });
 
 router.get('/terms-of-service', (req, res) => {
-    res.render('/var/task/views/terms');
+    res.render('terms');
 });
 
 router.get('/privacy-policy', (req, res) => {
-    res.render('/var/task/views/privacy');
+    res.render('privacy');
 });
 
 module.exports = router;
