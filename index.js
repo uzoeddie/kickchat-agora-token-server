@@ -34,7 +34,7 @@ if(process.env.NODE_ENV === 'development') {
 const app = express();
 app.use(favicon(path.join(__dirname, 'public/img', 'favicon.ico')));
 app.use(express.static('public'));
-app.set('view engine', 'ejs');
+// app.set('view engine', 'ejs');
 app.use(cors());
 app.use(helmet());
 app.use(express.json({}));

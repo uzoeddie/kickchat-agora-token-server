@@ -2,15 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.render('index.ejs', { root: './var/task/views' });
+    res.sendFile('index.html', { root: './views' });
 });
 
 router.get('/terms-of-service', (req, res) => {
-    res.render('terms.ejs', { root: './var/task/views' });
+    res.sendFile('terms.html', { root: './views' });
 });
 
 router.get('/privacy-policy', (req, res) => {
-    res.render('privacy.ejs', { root: './var/task/views' });
+    res.sendFile('privacy.html', { root: './views' });
 });
 
 module.exports = router;
