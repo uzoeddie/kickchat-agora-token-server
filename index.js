@@ -24,8 +24,8 @@ if(process.env.NODE_ENV === 'development') {
         "auth_provider_x509_cert_url": process.env.AUTH_PROVIDER_X509_CERT_URL,
         "client_x509_cert_url": process.env.CLIENT_X509_CERT_URL
     };
-    fs.writeFileSync('./kickchat-service-account.json', JSON.stringify(serviceData), 'utf8');
-    const serviceAccountData = require('./kickchat-service-account.json');
+    fs.writeFileSync('/tmp/kickchat-service-account.json', JSON.stringify(serviceData), 'utf8');
+    const serviceAccountData = require('/tmp/kickchat-service-account.json');
     adminInitializeApp(serviceAccountData);
 }
 
