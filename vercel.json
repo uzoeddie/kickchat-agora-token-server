@@ -3,8 +3,8 @@
   "name": "kickchat-agora-token-server",
   "routes": [{ "src": "/(.*)", "dest": "/" }],
   "functions": {
-    "api/*.js": {
-      "includeFiles": "views/**"
+    "api/**/*.js": {
+      "includeFiles": "api/views/**"
     }
   }
 }

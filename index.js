@@ -32,19 +32,19 @@ if(process.env.NODE_ENV === 'development') {
 }
 
 const app = express();
-app.use(favicon(path.join(__dirname, 'public/img', 'favicon.ico')));
-app.use(express.static('public'));
+app.use(favicon(path.join(__dirname, 'api/public/img', 'favicon.ico')));
+app.use(express.static('api/public'));
 // app.set('view engine', 'ejs');
 app.use(cors());
 app.use(helmet());
 app.use(express.json({}));
 app.use(express.urlencoded({ extended: true }));
 
-const index = require('./controllers/indexCtrl');
-const accessToken = require('./routes/access-token');
-const validateEmail = require('./routes/validate-email');
-const topicPushNotification = require('./routes/topic-push-notification');
-const health = require('./routes/health');
+const index = require('./api/controllers/indexCtrl');
+const accessToken = require('./api/routes/access-token');
+const validateEmail = require('./api/routes/validate-email');
+const topicPushNotification = require('./api/routes/topic-push-notification');
+const health = require('./api/routes/health');
 
 app.use('/', index);
 app.use('/', accessToken);
