@@ -11,7 +11,7 @@ const path = require('path');
 const PORT = 8080;
 
 if(process.env.NODE_ENV === 'development') {
-    const serviceAccount = require('./kickchatdev-service-account.json');
+    const serviceAccount = require('./kickchat-service-account.json');
     adminInitializeApp(serviceAccount);
 } else {
     let serviceData = {
@@ -67,6 +67,6 @@ app.listen(PORT, () => {
 function adminInitializeApp(serviceAccountJson) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccountJson), 
-        databaseURL: 'https://kickchat-dev.firebaseio.com'
+        databaseURL: 'https://kickchat.firebaseio.com'
     });
 }
