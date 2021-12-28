@@ -26,7 +26,7 @@ module.exports = {
             const payload = {
                 notification: {
                     title: 'KickChat',
-                    body: `${username} a new post.`,
+                    body: `${username} added a new post.`,
                     clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
                 data: {'type': 'followersPost', 'postId': postId},
@@ -34,6 +34,27 @@ module.exports = {
             await admin.messaging().sendToTopic(topic, payload);
             return res.json({message: 'Notification sent'});
 
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
+    async sendUpcomingAudioNotificationTags(req, res) {
+        try {
+            const { topic, roomId } = req.body;
+            const topics = topic.split(',');
+            for(let topicName in topics) {
+                const payload = {
+                    notification: {
+                        title: 'KickChat',
+                        body: `A discussion related to your interest ${topicName} has started. You can join the discussion.`,
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    },
+                    data: {'type': 'upcomingRoom', 'roomId': roomId},
+                };
+                await admin.messaging().sendToTopic(topicName, payload);
+            }
+            return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
         }
