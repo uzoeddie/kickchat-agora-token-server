@@ -7,6 +7,7 @@ const fs = require('fs');
 const helmet = require("helmet");
 const favicon = require('serve-favicon');
 const path = require('path');
+const i18n = require('i18n');
 
 const PORT = 8080;
 
@@ -32,6 +33,12 @@ if(process.env.NODE_ENV === 'development') {
 }
 
 const app = express();
+i18n.configure({
+    locales: ['en', 'es', 'de', 'it', 'pt', 'fr'],
+    directory: path.join(__dirname, 'locales'),
+    defaultLocale: 'en',
+    register: global
+});
 app.use(favicon(path.join(__dirname, 'public/img', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));

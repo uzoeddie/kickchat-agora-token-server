@@ -6,7 +6,7 @@ module.exports = {
             const { pollId, question } = req.body;
             const payload = {
                 notification: {
-                    title: 'KickChat poll. Vote now.',
+                    title: translate('kickchatPoll', 'en', ''),
                     body: `${question}`,
                     clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
@@ -22,11 +22,11 @@ module.exports = {
 
     async sendPostNotificationToFollowers(req, res) {
         try {
-            const { username, topic, postId } = req.body;
+            const { username, topic, postId, locale } = req.body;
             const payload = {
                 notification: {
                     title: 'KickChat',
-                    body: `${username} added a new post.`,
+                    body: translate('userAddedPost', locale, `${username}`),
                     clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
                 data: {'type': 'followersPost', 'postId': postId},
@@ -41,22 +41,25 @@ module.exports = {
 
     async sendUpcomingAudioNotificationTags(req, res) {
         try {
-            const { topic, roomId } = req.body;
-            const topics = topic.split(',');
-            for(let topicName in topics) {
+            const { topic, roomId, locale } = req.body;
+            for(let topicName of JSON.parse(topic)) {
                 const payload = {
                     notification: {
                         title: 'KickChat',
-                        body: `A discussion related to your interest ${topicName} has started. You can join the discussion.`,
+                        body: translate('discussionRelatedToYourInterest', locale, `${topicName['interest']}`),
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                     },
                     data: {'type': 'upcomingRoom', 'roomId': roomId},
                 };
-                await admin.messaging().sendToTopic(topicName, payload);
+                await admin.messaging().sendToTopic(topicName['topic'], payload);
             }
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
         }
     }
+}
+
+function translate(phrase, locale, ph) {
+    return __({ phrase, locale }, ph);
 }
