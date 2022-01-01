@@ -1,5 +1,6 @@
 {
     "discussionRelatedToYourInterest": "A discussion related to your interest %s has been created. Open and click on notify me to get notified when it starts.",
+    "liveAudioDiscussion": "A live audio discussion related to your interest %s has started. Click to join.",
     "userAddedPost": "%s added a new post.",
     "kickchatPoll": "KickChat poll. Vote now."
 }

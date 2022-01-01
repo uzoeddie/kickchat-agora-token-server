@@ -39,6 +39,26 @@ module.exports = {
         }
     },
 
+    async sendLiveAudioNotificationTags(req, res) {
+        try {
+            const { topic, roomId, locale } = req.body;
+            for(let topicName of JSON.parse(topic)) {
+                const payload = {
+                    notification: {
+                        title: 'KickChat',
+                        body: translate('liveAudioDiscussion', locale, `${topicName['interest']}`),
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    },
+                    data: {'type': 'liveAudioRoom', 'roomId': roomId},
+                };
+                await admin.messaging().sendToTopic(topicName['topic'], payload);
+            }
+            return res.json({message: 'Notification sent'});
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
     async sendUpcomingAudioNotificationTags(req, res) {
         try {
             const { topic, roomId, locale } = req.body;
