@@ -49,6 +49,7 @@ app.use(express.json({}));
 app.use(express.urlencoded({ extended: true }));
 
 const index = require('./controllers/indexCtrl');
+const smartalarm = require('./controllers/smartalarmCtrl');
 const accessToken = require('./routes/access-token');
 const validateEmail = require('./routes/validate-email');
 const topicPushNotification = require('./routes/topic-push-notification');
@@ -56,6 +57,7 @@ const health = require('./routes/health');
 const user = require('./routes/user');
 
 app.use('/', index);
+app.use('/', smartalarm);
 app.use('/', accessToken);
 app.use('/', validateEmail);
 app.use('/', topicPushNotification);
