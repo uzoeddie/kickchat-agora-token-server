@@ -39,6 +39,25 @@ module.exports = {
         }
     },
 
+    async sendPostReactionNotification(req, res) {
+        try {
+            const { topic, title, body, payload } = req.body;
+            const notificationPayload = {
+                notification: {
+                    title,
+                    body,
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: JSON.parse(payload),
+            };
+            await admin.messaging().sendToTopic(topic, notificationPayload);
+            return res.json({message: 'Notification sent'});
+
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
     async sendLiveAudioNotificationTags(req, res) {
         try {
             const { topic, roomId, locale } = req.body;
