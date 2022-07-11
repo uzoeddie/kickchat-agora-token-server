@@ -20,6 +20,27 @@ module.exports = {
         }
     },
 
+    async sendPollResultNotification(req, res) {
+        try {
+            const { pollId, question } = req.body;
+            const payload = {
+                notification: {
+                    title: translate('kickchatPollResult', 'en', ''),
+                    body: `${question}`,
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'polls', 'pollId': pollId},
+            };
+            console.log(payload);
+            await admin.messaging().sendToTopic('polls', payload);
+            return res.json({message: 'Notification sent'});
+
+        } catch (error) {
+            console.log(error);
+            return res.json(error);
+        }
+    },
+
     async sendPostNotificationToFollowers(req, res) {
         try {
             const { username, topic, postId, locale } = req.body;

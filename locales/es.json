@@ -2,5 +2,6 @@
     "discussionRelatedToYourInterest": "Se ha creado un debate relacionado con su interés %s. Abre y haz clic en notificarme para que te avisen cuando se inicie",
     "liveAudioDiscussion": "Se ha iniciado un debate de audio en directo relacionado con su interés %s. Haga clic para unirse.",
     "userAddedPost": "%s ha añadido una nueva entrada.",
-    "kickchatPoll": "Encuesta de KickChat. Vota ahora."
+    "kickchatPoll": "Encuesta de KickChat. Vota ahora.",
+    "kickchatPollResult": "Ver resultado de la encuesta"
 }

@@ -12,8 +12,8 @@ const i18n = require('i18n');
 const PORT = 8080;
 
 if(process.env.NODE_ENV === 'development') {
-    const serviceAccount = require('./kickchat-service-account.json');
-    adminInitializeApp(serviceAccount);
+    const serviceAccount = require('./kickchatdev-service-account.json');
+    adminInitializeApp(serviceAccount, 'https://kickchat-dev.firebaseio.com'); // https://kickchat-dev.firebaseio.com does not work
 } else {
     let serviceData = {
         "type": process.env.TYPE,
@@ -29,7 +29,7 @@ if(process.env.NODE_ENV === 'development') {
     };
     fs.writeFileSync('/tmp/kickchat-service-account.json', JSON.stringify(serviceData), 'utf8');
     const serviceAccountData = require('/tmp/kickchat-service-account.json');
-    adminInitializeApp(serviceAccountData);
+    adminInitializeApp(serviceAccountData, 'https://kickchat.firebaseio.com');
 }
 
 const app = express();
@@ -69,13 +69,12 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(process.env.SERVICE_ACCOUNT);
     console.log(`Listening on port: ${PORT}`);
 });
 
-function adminInitializeApp(serviceAccountJson) {
+function adminInitializeApp(serviceAccountJson, databaseURL) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccountJson), 
-        databaseURL: 'https://kickchat.firebaseio.com'
-    });
+        databaseURL
+    });    
 }
