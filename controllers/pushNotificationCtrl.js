@@ -31,7 +31,6 @@ module.exports = {
                 },
                 data: {'type': 'polls', 'pollId': pollId},
             };
-            console.log(payload);
             await admin.messaging().sendToTopic('polls', payload);
             return res.json({message: 'Notification sent'});
 
