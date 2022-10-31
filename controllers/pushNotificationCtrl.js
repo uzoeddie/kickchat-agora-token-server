@@ -59,6 +59,25 @@ module.exports = {
         }
     },
 
+    async sendLineupNotificationToFollowers(req, res) {
+        try {
+            const { username, topic, userId, locale } = req.body;
+            const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translate('userAddedLineup', locale, `${username}`),
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'lineupPost', 'userId': userId},
+            };
+            await admin.messaging().sendToTopic(topic, payload);
+            return res.json({message: 'Notification sent'});
+
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
     async sendPostReactionNotification(req, res) {
         try {
             const { topic, title, body, payload } = req.body;

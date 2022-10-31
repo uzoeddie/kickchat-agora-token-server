@@ -3,5 +3,6 @@
     "liveAudioDiscussion": "Eine Live-Audio-Diskussion zu Ihrem Interesse %s hat begonnen. Klicken Sie, um teilzunehmen.",
     "userAddedPost": "%s hat einen neuen Beitrag hinzugefügt.",
     "kickchatPoll": "KickChat-Umfrage. Jetzt abstimmen.",
-    "kickchatPollResult": "Umfrageergebnis anzeigen"
+    "kickchatPollResult": "Umfrageergebnis anzeigen",
+    "userAddedLineup": "%s eine neue Fußballaufstellung hinzugefügt."
 }
