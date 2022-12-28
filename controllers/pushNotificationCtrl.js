@@ -33,9 +33,7 @@ module.exports = {
             };
             await admin.messaging().sendToTopic('polls', payload);
             return res.json({message: 'Notification sent'});
-
         } catch (error) {
-            console.log(error);
             return res.json(error);
         }
     },
@@ -54,6 +52,24 @@ module.exports = {
             await admin.messaging().sendToTopic(topic, payload);
             return res.json({message: 'Notification sent'});
 
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
+    async sendVideoAddedNotification(req, res) {
+        try {
+            const { title, topic, postId } = req.body;
+            const payload = {
+                notification: {
+                    title: 'Watch match highlights',
+                    body: translate(`${title}`, 'en', ''),
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'followersPost', 'postId': postId},
+            };
+            await admin.messaging().sendToTopic(topic, payload);
+            return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
         }
