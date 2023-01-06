@@ -1,5 +1,5 @@
 const express = require("express");
-const assetsLinks = require('../assetLinks.json');
+const assetsLinks = require('../.well-known/assetLinks.json');
 const router = express.Router();
 
 router.get('/', (req, res) => {
