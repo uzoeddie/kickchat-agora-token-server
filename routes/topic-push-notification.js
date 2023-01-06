@@ -11,5 +11,6 @@ router.post('/send-lineup-notification-to-followers', pushNotificationCtrl.sendL
 router.post('/send-upcoming-audio-notification-to-tags', pushNotificationCtrl.sendUpcomingAudioNotificationTags);
 router.post('/send-live-audio-notification-to-tags', pushNotificationCtrl.sendLiveAudioNotificationTags);
 router.post('/send-post-react-notification', pushNotificationCtrl.sendPostReactionNotification);
+router.post('/send-team-group-notification', pushNotificationCtrl.sendTeamGroupNotification);
 
 module.exports = router;

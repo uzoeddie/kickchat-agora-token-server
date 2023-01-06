@@ -1,8 +1,9 @@
 {
-    "discussionRelatedToYourInterest": "A discussion related to your interest %s has been created. Open and click on notify me to get notified when it starts.",
-    "liveAudioDiscussion": "A live audio discussion related to your interest %s has started. Click to join.",
+    "discussionRelatedToYourInterest": "A discussion related to your interest has been created. Open and click on notify me to get notified when it starts.",
+    "liveAudioDiscussion": "A live audio discussion related to your interests has started. Click to join.",
     "userAddedPost": "%s added a new post.",
     "userAddedLineup": "%s added a new footbal lineup.",
     "kickchatPoll": "KickChat poll. Vote now.",
-    "kickchatPollResult": "View poll result"
+    "kickchatPollResult": "View poll result",
+    "teamGroupMessage": "A new chat group %s was added for %s. Click to join."
 }

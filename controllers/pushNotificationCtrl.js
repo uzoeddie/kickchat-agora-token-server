@@ -1,5 +1,7 @@
 const admin = require('firebase-admin');
 
+const localeList = ['en', 'es', 'de', 'it', 'pt', 'fr'];
+
 module.exports = {
     async sendPollNotification(req, res) {
         try {
@@ -41,10 +43,15 @@ module.exports = {
     async sendPostNotificationToFollowers(req, res) {
         try {
             const { username, topic, postId, locale } = req.body;
+            let newLocale = 'en';
+            const hasLocale = localeList.includes(locale);
+            if (hasLocale) {
+                newLocale = locale;
+            }
             const payload = {
                 notification: {
                     title: 'KickChat',
-                    body: translate('userAddedPost', locale, `${username}`),
+                    body: translate('userAddedPost', newLocale, `${username}`),
                     clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
                 data: {'type': 'followersPost', 'postId': postId},
@@ -78,17 +85,21 @@ module.exports = {
     async sendLineupNotificationToFollowers(req, res) {
         try {
             const { username, topic, userId, locale } = req.body;
+            let newLocale = 'en';
+            const hasLocale = localeList.includes(locale);
+            if (hasLocale) {
+                newLocale = locale;
+            }
             const payload = {
                 notification: {
                     title: 'KickChat',
-                    body: translate('userAddedLineup', locale, `${username}`),
+                    body: translate('userAddedLineup', newLocale, `${username}`),
                     clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
                 data: {'type': 'lineupPost', 'userId': userId},
             };
             await admin.messaging().sendToTopic(topic, payload);
             return res.json({message: 'Notification sent'});
-
         } catch (error) {
             return res.json(error);
         }
@@ -115,18 +126,16 @@ module.exports = {
 
     async sendLiveAudioNotificationTags(req, res) {
         try {
-            const { topic, roomId, locale } = req.body;
-            for(let topicName of JSON.parse(topic)) {
-                const payload = {
-                    notification: {
-                        title: 'KickChat',
-                        body: translate('liveAudioDiscussion', locale, `${topicName['interest']}`),
-                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    },
-                    data: {'type': 'liveAudioRoom', 'roomId': roomId},
-                };
-                await admin.messaging().sendToTopic(topicName['topic'], payload);
-            }
+            const { roomId } = req.body;
+            const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translate('liveAudioDiscussion', 'en', ''),
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'liveAudioRoom', 'roomId': roomId},
+            };
+            await admin.messaging().sendToTopic('global', payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -135,25 +144,50 @@ module.exports = {
 
     async sendUpcomingAudioNotificationTags(req, res) {
         try {
-            const { topic, roomId, locale } = req.body;
-            for(let topicName of JSON.parse(topic)) {
-                const payload = {
-                    notification: {
-                        title: 'KickChat',
-                        body: translate('discussionRelatedToYourInterest', locale, `${topicName['interest']}`),
-                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    },
-                    data: {'type': 'upcomingRoom', 'roomId': roomId},
-                };
-                await admin.messaging().sendToTopic(topicName['topic'], payload);
-            }
+            const { roomId } = req.body;            
+            const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translate('discussionRelatedToYourInterest', 'en', ''),
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'upcomingRoom', 'roomId': roomId},
+            };
+            await admin.messaging().sendToTopic(topicName['topic'], payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
         }
-    }
+    },
+
+    async sendTeamGroupNotification(req, res) {
+        try {
+            const { topic, group, team, groupId, locale } = req.body;
+            let newLocale = 'en';
+            const hasLocale = localeList.includes(locale);
+            if (hasLocale) {
+                newLocale = locale;
+            }
+            const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translateWithParams('teamGroupMessage', newLocale, `${group}`, `${team}`),
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'teamGroup', 'groupId': groupId, 'team': team},
+            };
+            await admin.messaging().sendToTopic(topic, payload);
+            return res.json({message: 'Notification sent'});
+        } catch (error) {
+            return res.json(error);
+        }
+    },
 }
 
 function translate(phrase, locale, ph) {
     return __({ phrase, locale }, ph);
+}
+
+function translateWithParams(phrase, locale, param1, param2) {
+    return __({ phrase, locale }, param1, param2);
 }
