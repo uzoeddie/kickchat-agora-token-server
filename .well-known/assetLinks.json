@@ -1,25 +1,10 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.kickchat.uzochukwu",
-    "sha256_cert_fingerprints":
-    ["10:10:B5:BB:66:E3:29:5C:67:27:96:51:1C:35:8E:A6:CE:89:01:BD:22:E9:50:79:66:04:FC:33:61:B8:6F:FD"]
-  }
-},
-{
-  "relation": ["delegate_permission/common.get_login_creds"],
-  "target": {
-    "namespace": "web",
-    "site": "https://www.kickchatapp.com"
-  }
-},
-{
-  "relation": ["delegate_permission/common.get_login_creds"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.kickchat.uzochukwu",
-    "sha256_cert_fingerprints":
-    ["10:10:B5:BB:66:E3:29:5C:67:27:96:51:1C:35:8E:A6:CE:89:01:BD:22:E9:50:79:66:04:FC:33:61:B8:6F:FD"]
-  }
-}]
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "",
+        "sha256_cert_fingerprints": []
+      }
+    }
+]
