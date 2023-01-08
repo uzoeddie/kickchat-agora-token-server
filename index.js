@@ -54,6 +54,7 @@ const validateEmail = require('./routes/validate-email');
 const topicPushNotification = require('./routes/topic-push-notification');
 const health = require('./routes/health');
 const user = require('./routes/user');
+const sms77 = require('./routes/sms77');
 
 app.use('/', index);
 app.use('/', accessToken);
@@ -61,6 +62,7 @@ app.use('/', validateEmail);
 app.use('/', topicPushNotification);
 app.use('/', health);
 app.use('/', user);
+app.use('/', sms77);
 
 app.use((error, req, res, next) => {
     console.error('Error: ', error)
