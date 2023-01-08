@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "B6Q8TK8Q2Q.com.kickchat.uzochukwu",
+        "paths": [
+          "NOT /_/*",
+          "/*"
+        ]
+      }
+    ]
+  }
+  }
