@@ -8,8 +8,17 @@ const helmet = require("helmet");
 const favicon = require('serve-favicon');
 const path = require('path');
 const i18n = require('i18n');
+const http = require('http');
+const { Server } = require("socket.io");
+const SocketIOUserHandler = require('./sockets/user.socket');
+const SocketIOUserChatRoomHandler = require('./sockets/chatroom.socket');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
 const PORT = 8080;
+const connectedUsersMap = new Map();
 
 if(process.env.NODE_ENV === 'development') {
     const serviceAccount = require('./kickchatdev-service-account.json');
@@ -32,7 +41,6 @@ if(process.env.NODE_ENV === 'development') {
     adminInitializeApp(serviceAccountData, 'https://kickchat.firebaseio.com');
 }
 
-const app = express();
 i18n.configure({
     locales: ['en', 'es', 'de', 'it', 'pt', 'fr'],
     directory: path.join(__dirname, 'locales'),
@@ -66,11 +74,19 @@ app.use('/', sms77);
 
 app.use((error, req, res, next) => {
     console.error('Error: ', error)
-   
     res.status(500).json(error);   
 });
 
-app.listen(PORT, () => {
+socketIOConnections(io);
+
+function socketIOConnections(io) {
+    const userSocketHandler = new SocketIOUserHandler(io);
+    const userRoomSocketHandler = new SocketIOUserChatRoomHandler(io);
+    userSocketHandler.listen();
+    userRoomSocketHandler.listen();
+}
+
+server.listen(PORT, () => {
     console.log(`Listening on port: ${PORT}`);
 });
 
