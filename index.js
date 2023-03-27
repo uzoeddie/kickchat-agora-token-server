@@ -12,6 +12,7 @@ const http = require('http');
 const { Server } = require("socket.io");
 const SocketIOUserHandler = require('./sockets/user.socket');
 const SocketIOUserChatRoomHandler = require('./sockets/chatroom.socket');
+const SocketIOAudioRoomHandler = require('./sockets/audio_room.socket');
 
 const app = express();
 const server = http.createServer(app);
@@ -82,8 +83,10 @@ socketIOConnections(io);
 function socketIOConnections(io) {
     const userSocketHandler = new SocketIOUserHandler(io);
     const userRoomSocketHandler = new SocketIOUserChatRoomHandler(io);
+    const audioRoomSocketHandler = new SocketIOAudioRoomHandler(io);
     userSocketHandler.listen();
     userRoomSocketHandler.listen();
+    audioRoomSocketHandler.listen();
 }
 
 server.listen(PORT, () => {
