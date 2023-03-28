@@ -9,17 +9,11 @@ const favicon = require('serve-favicon');
 const path = require('path');
 const i18n = require('i18n');
 const http = require('http');
-const { Server } = require("socket.io");
-const SocketIOUserHandler = require('./sockets/user.socket');
-const SocketIOUserChatRoomHandler = require('./sockets/chatroom.socket');
-const SocketIOAudioRoomHandler = require('./sockets/audio_room.socket');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
 const PORT = 8080;
-const connectedUsersMap = new Map();
 
 if(process.env.NODE_ENV === 'development') {
     const serviceAccount = require('./kickchatdev-service-account.json');
@@ -77,17 +71,6 @@ app.use((error, req, res, next) => {
     console.error('Error: ', error)
     res.status(500).json(error);   
 });
-
-socketIOConnections(io);
-
-function socketIOConnections(io) {
-    const userSocketHandler = new SocketIOUserHandler(io);
-    const userRoomSocketHandler = new SocketIOUserChatRoomHandler(io);
-    const audioRoomSocketHandler = new SocketIOAudioRoomHandler(io);
-    userSocketHandler.listen();
-    userRoomSocketHandler.listen();
-    audioRoomSocketHandler.listen();
-}
 
 server.listen(PORT, () => {
     console.log(`Listening on port: ${PORT}`);
