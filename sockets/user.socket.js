@@ -16,6 +16,14 @@ class SocketIOUserHandler {
                 this.io.emit('users online', Array.from(connectedUsersMap.values()));
             });
 
+            socket.on('logout', (username) => {
+                const user = Array.from(connectedUsersMap.values()).find((data) => data.username === username);
+                if (user && user?.username && user?.userId) {
+                    this.updateUserActive(user.userId);
+                    this.removeClientFromMap(user.socketId);
+                }
+            });
+
             socket.on('disconnect', () => {
                 const user = Array.from(connectedUsersMap.values()).find((data) => data.socketId === socket.id);
                 if (user && user?.username && user?.userId) {
@@ -47,6 +55,9 @@ class SocketIOUserHandler {
         try {
             await admin.firestore().collection('users').doc(userId).update({
                 active: false,
+                onChatPage: false,
+                'chat.userOne': '',
+                'chat.userTwo': '',
             });
         } catch (error) {
             console.log(error);
