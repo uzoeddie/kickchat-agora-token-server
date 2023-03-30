@@ -5,7 +5,7 @@ const localeList = ['en', 'es', 'de', 'it', 'pt', 'fr'];
 module.exports = {
     async sendPushNotification(req, res) {
         try {
-            const { token, title, body, payload } = req.body;
+            const { token, title, body, payload, receiverId } = req.body;
             const payloadBody = {
                 notification: {
                     title,
@@ -14,9 +14,19 @@ module.exports = {
                 },
                 data: JSON.parse(payload),
             };
-            await admin.messaging().sendToDevice(token, payloadBody);
+            if (receiverId) {
+                const userDocument = await admin.firestore().collection('users').doc(receiverId).get();
+                const user = userDocument.data();
+                if (user !== null && userDocument.exists) {
+                    await admin.messaging().sendToDevice(user.fcmToken, payloadBody);
+                } else {
+                    await admin.messaging().sendToDevice(token, payloadBody);
+                }
+                
+            } else {
+                await admin.messaging().sendToDevice(token, payloadBody);
+            }
             return res.json({message: 'Notification sent'});
-
         } catch (error) {
             return res.json(error);
         }
