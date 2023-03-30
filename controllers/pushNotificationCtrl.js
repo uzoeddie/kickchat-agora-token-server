@@ -3,6 +3,25 @@ const admin = require('firebase-admin');
 const localeList = ['en', 'es', 'de', 'it', 'pt', 'fr'];
 
 module.exports = {
+    async sendPushNotification(req, res) {
+        try {
+            const { token, title, body, payload } = req.body;
+            const payloadBody = {
+                notification: {
+                    title,
+                    body,
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: payload,
+            };
+            await admin.messaging().sendToDevice(token, payloadBody)
+            return res.json({message: 'Notification sent'});
+
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
     async sendPollNotification(req, res) {
         try {
             const { pollId, question } = req.body;

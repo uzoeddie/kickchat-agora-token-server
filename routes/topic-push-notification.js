@@ -3,6 +3,7 @@ const router = express.Router();
 
 const pushNotificationCtrl = require('../controllers/pushNotificationCtrl');
 
+router.post('/send_push_notification', pushNotificationCtrl.sendPushNotification);
 router.post('/send_poll_notification', pushNotificationCtrl.sendPollNotification);
 router.post('/send_poll_result_notification', pushNotificationCtrl.sendPollResultNotification);
 router.post('/send-post-notification-to-followers', pushNotificationCtrl.sendPostNotificationToFollowers);
