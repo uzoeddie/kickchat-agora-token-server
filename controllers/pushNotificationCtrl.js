@@ -12,9 +12,9 @@ module.exports = {
                     body,
                     clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: payload,
+                data: JSON.parse(payload),
             };
-            await admin.messaging().sendToDevice(token, payloadBody)
+            await admin.messaging().sendToDevice(token, payloadBody);
             return res.json({message: 'Notification sent'});
 
         } catch (error) {
