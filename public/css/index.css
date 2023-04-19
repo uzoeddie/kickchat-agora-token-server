@@ -51,6 +51,7 @@ body {
   justify-content: flex-start;
   gap: 10px;
   max-width: 100%;
+  z-index: 10;
 }
 
 .androidpng-icon {
@@ -77,6 +78,7 @@ body {
   height: 90%;
   margin-top: 10% !important;
   height: auto;
+  z-index: 10;
 }
 
 .landing-page-inner {
