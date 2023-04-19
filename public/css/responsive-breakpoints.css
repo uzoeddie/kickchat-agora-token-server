@@ -1,0 +1,273 @@
+@media all and (max-width: 280px) {
+    .second-to-last-frame-child {
+        display: none;
+    }
+
+    .last-frame-child {
+        display: none;
+    }
+
+    .frame-child {
+        width: 500px !important;
+        height: 500px !important;
+        object-fit: cover;
+    }
+}
+
+@media all and (max-width: 440px) {
+    .last-frame-child {
+        display: none;
+    }
+}
+
+@media all and (max-width: 540px) {
+    .androidpng-parent {
+        align-self: center;
+    }
+
+    .frame-child {
+        width: 100px !important;
+        height: 100px !important;
+        object-fit: cover;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .join-communities-of-container1 {
+        font-size: 8vw;
+    }
+
+    .kickchat-is-a-container {
+        font-size: 20px !important;
+    }
+
+    .androidpng-parent {
+        justify-content: center;
+    }
+
+    .frame-parent {
+        align-self: center;
+    }
+
+    .frame-child {
+        width: 50px !important;
+        height: 50px !important;
+        object-fit: cover;
+    }
+
+    .landing-page-image {
+        display: none;
+    }
+
+    .header-text-container {
+        margin-top: 25% !important;
+    }
+
+    .home-parent {
+        display: none;
+    }
+
+    .mobile-menu .home {
+        font-size: 16px !important;
+    }
+      
+    .mobile-menu .home a {
+        color: white !important;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .home-parent {
+      display: none;
+    }
+  
+    #hamburger-icon {
+      display: block;
+    }
+
+    .mobile-menu .home {
+        font-size: 22px;
+      }
+      
+      .mobile-menu .home a {
+        color: white !important;
+      }
+  }
+
+@media all and (min-width: 577px) and (max-width: 767px) {
+    .join-communities-of-container1 {
+        font-size: 45px;
+    }
+
+    .kickchat-is-a-container {
+        font-size: 25px !important;
+    }
+
+    .frame-child {
+        width: 90px !important;
+        height: 90px !important;
+        object-fit: cover;
+    }
+
+    .home-parent {
+        display: none !important;
+    }
+
+    #hamburger-icon {
+        display: block;
+    }
+
+    .mobile-menu .home {
+        font-size: 22px;
+    }
+
+    .mobile-menu .home a {
+        color: white !important;
+    }
+} 
+
+@media all and (min-width: 577px) and (max-width: 840px) {
+    .landing-page-inner {
+        height: 700px;
+        object-fit: cover;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    .join-communities-of-container1 {
+        font-size: 50px;
+    }
+
+    .kickchat-is-a-container {
+        font-size: 25px !important;
+    }
+
+    .ellipse-parent, .frame-parent {
+        row-gap: 35px !important;
+    }
+
+    .frame-child {
+        width: 100px !important;
+        height: 100px !important;
+        object-fit: cover;
+    }
+
+    .home-parent {
+        display: none !important;
+    }
+
+    #hamburger-icon {
+        display: block;
+    }
+
+    .mobile-menu .home {
+        font-size: 22px;
+    }
+      
+    .mobile-menu .home a {
+        color: white !important;
+    }
+} 
+
+@media only screen and (width: 912px) {
+    .join-communities-of-container1 {
+        font-size: 8vw;
+    }
+
+    .kickchat-is-a-container {
+        font-size: 30px !important;
+    }
+
+    .frame-child {
+        width: 100px !important;
+        height: 100px !important;
+        object-fit: cover;
+    }
+
+    .home-parent {
+        display: none !important;
+    }
+
+    #hamburger-icon {
+        display: block;
+    }
+
+    .mobile-menu .home {
+        font-size: 22px;
+    }
+    
+    .mobile-menu .home a {
+        color: white !important;
+    }
+} 
+
+@media only screen and (min-width: 989px) {
+    .join-communities-of-container1 {
+        font-size: 60px;
+    }
+
+    .home-parent {
+        display: flex !important;
+    }
+
+    #hamburger-icon {
+        display: none !important;
+    }
+} 
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 990px) {
+    .join-communities-of-container1 {
+        font-size: 60px;
+    }
+
+    .home-parent {
+        display: flex !important;
+    }
+
+    #hamburger-icon {
+        display: none !important;
+    }
+}
+
+@media only screen and (width: 1024px) {
+    .join-communities-of-container1 {
+        font-size: 60px;
+    }
+
+    .home-parent {
+        display: flex !important;
+    }
+
+    #hamburger-icon {
+        display: none !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    .join-communities-of-container1 {
+        font-size: 60px;
+    }
+
+    .home-parent {
+        display: flex !important;
+    }
+
+    #hamburger-icon {
+        display: none !important;
+    }
+}
+
+@media only screen and (min-width: 1400px) {
+    .join-communities-of-container1 {
+        font-size: 60px;
+    }
+
+    .home-parent {
+        display: flex !important;
+    }
+
+    #hamburger-icon {
+        display: none !important;
+    }
+}

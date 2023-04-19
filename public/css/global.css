@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  line-height: normal;
+}
+
+:root {
+  /* fonts */
+  --font-campton: Campton;
+  --font-axiforma: Axiforma;
+  --font-open-sans: "Open Sans";
+  --font-roboto: "Roboto", sans-serif;
+
+  /* font sizes */
+  --font-size-sm: 14px;
+
+  /* Colors */
+  --color-darkslategray-100: #333;
+  --color-gray: #131313;
+
+  /* Gaps */
+  --gap-4xl-2: 23.2px;
+}

@@ -4,3 +4,4 @@ api.http
 kickchatdev-service-account.json
 kickchat-service-account.json
 .vercel
+.DS_Store
