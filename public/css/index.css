@@ -1,21 +1,48 @@
-body {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
   font-family: var(--font-open-sans);
+}
+
+*, ::after, ::before {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+html {
+  box-sizing: border-box;
+  height: 100%;           
+  margin: 0 10px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  background-color: white;
+}
+
+body::-webkit-scrollbar { 
+  display: none;
 }
 
 .landing-page {
   margin: 0 auto 0 auto;
-  width: 90%;
+  width: 100%;
   position: relative;
   background-color: white;
   color: var(--color-gray);
   height: 100%;
   overflow: hidden;
-  margin-bottom: 50px;
 }
 
 .landing-page-item {
-  z-index: -10;
-  position: absolute;
+  z-index: 1;
+  position: fixed;
   left: 50%;
   background: #4aa0f3;
   box-shadow: -10px 0 20px rgba(0, 0, 0, 0.2);
@@ -23,7 +50,6 @@ body {
   height: 1725px;
   transform: rotate(-38.77deg);
   transform-origin: 0 0;
-  overflow-y: hidden;
 }
 
 .join-communities-of-your-favor-parent {
@@ -67,6 +93,7 @@ body {
 
 .frame-parent {
   flex-direction: column;
+  margin-bottom: 20px;
 }
 
 .frame-child {
@@ -77,21 +104,24 @@ body {
 .landing-page-image {
   height: 90%;
   margin-top: 10% !important;
-  height: auto;
   z-index: 10;
 }
 
 .landing-page-inner {
-  height: 807.97px;
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .landing-page-child {
   position: absolute;
-  top: 0;
   left: 0;
   width: 1952.89px;
-  height: 1117px;
+  /* height: 1117px; */
+  max-width: 100%;
+  max-height: 100%;
+  z-index: -1;
 }
 
 .communities {

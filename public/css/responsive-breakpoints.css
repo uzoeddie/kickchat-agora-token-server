@@ -47,6 +47,11 @@
 
     .frame-parent {
         align-self: center;
+        margin-bottom: 20px !important;
+    }
+
+    .ellipse-parent, .frame-parent {
+        gap: 15px !important;
     }
 
     .frame-child {
@@ -55,12 +60,16 @@
         object-fit: cover;
     }
 
-    .landing-page-image {
-        display: none;
+    .join-communities-of-your-favor-parent {
+        margin-top: 0% !important;
     }
 
-    .header-text-container {
-        margin-top: 25% !important;
+    .landing-page-image {
+        margin-top: 30% !important;
+    }
+
+    .landing-page-child {
+        display: none;
     }
 
     .home-parent {
@@ -87,11 +96,11 @@
 
     .mobile-menu .home {
         font-size: 22px;
-      }
-      
-      .mobile-menu .home a {
+    }
+    
+    .mobile-menu .home a {
         color: white !important;
-      }
+    }
   }
 
 @media all and (min-width: 577px) and (max-width: 767px) {
@@ -125,13 +134,6 @@
         color: white !important;
     }
 } 
-
-@media all and (min-width: 577px) and (max-width: 840px) {
-    .landing-page-inner {
-        height: 700px;
-        object-fit: cover;
-    }
-}
 
 @media only screen and (min-width: 768px) {
     .join-communities-of-container1 {
@@ -201,6 +203,18 @@
     }
 } 
 
+@media only screen and (min-width: 912px) {
+    .kickchat {
+        font-size: 35px;
+    }
+
+    .app_icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 8px;
+    }
+} 
+
 @media only screen and (min-width: 989px) {
     .join-communities-of-container1 {
         font-size: 60px;
@@ -215,7 +229,6 @@
     }
 } 
 
-/* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 990px) {
     .join-communities-of-container1 {
         font-size: 60px;
@@ -231,6 +244,10 @@
 }
 
 @media only screen and (width: 1024px) {
+    body {
+        margin: 0 30px !important;
+    }
+
     .join-communities-of-container1 {
         font-size: 60px;
     }
@@ -245,6 +262,10 @@
 }
 
 @media only screen and (min-width: 1200px) {
+    body {
+        margin: 0 30px !important;
+    }
+
     .join-communities-of-container1 {
         font-size: 60px;
     }
@@ -259,6 +280,10 @@
 }
 
 @media only screen and (min-width: 1400px) {
+    body {
+        margin: 0 30px !important;
+    }
+
     .join-communities-of-container1 {
         font-size: 60px;
     }
