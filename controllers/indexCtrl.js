@@ -2,21 +2,22 @@ const express = require("express");
 const assetsLinks = require('../.well-known/assetLinks.json');
 const appleAppSite = require('../.well-known/apple-app-site-association.json');
 const router = express.Router();
+const { indexNonce } = require('../nounce');
 
 router.get('/', (req, res) => {
-    res.render('index');
+    res.render('index', { nounce: indexNonce });
 });
 
 router.get('/terms-of-service', (req, res) => {
-    res.render('terms');
+    res.render('terms', { nounce: indexNonce });
 });
 
 router.get('/privacy-policy', (req, res) => {
-    res.render('privacy');
+    res.render('privacy', { nounce: indexNonce });
 });
 
 router.get('/contact', (req, res) => {
-    res.render('contact');
+    res.render('contact', { nounce: indexNonce });
 });
 
 router.get('/.well-known/assetlinks.json', (req, res) => {

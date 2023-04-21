@@ -9,6 +9,7 @@ const favicon = require('serve-favicon');
 const path = require('path');
 const i18n = require('i18n');
 const http = require('http');
+const { indexNonce } = require("./nounce");
 
 const app = express();
 const server = http.createServer(app);
@@ -47,7 +48,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs')
 app.use(cors());
-app.use(helmet());
+app.use(function (req, res, next) {
+    res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; font-src 'self'; img-src 'self'; frame-src 'self'; connect-src 'self';"
+    );
+    next();
+});
+
+app.use(helmet({
+    // this is set for content security policy
+    contentSecurityPolicy: {
+        directives: {
+            scriptSrc: [
+                "'strict-dynamic'", // For nonces to work
+                `'nonce-${indexNonce}'`,
+            ],
+            connectSrc: ["'self'", "https://*.google-analytics.com"],
+            scriptSrcAttr: null, // Remove Firefox warning
+        },
+    },
+}));
 app.use(express.json({}));
 app.use(express.urlencoded({ extended: true }));
 
