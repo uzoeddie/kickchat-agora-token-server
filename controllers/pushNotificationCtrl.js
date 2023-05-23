@@ -144,16 +144,23 @@ module.exports = {
 
     async sendLiveAudioNotificationTags(req, res) {
         try {
-            const { roomId } = req.body;
+            const { roomId, topic, locale } = req.body;
+            const parsedTopics = JSON.parse(topic);
+            let condition = '';
+            const lastIndex = parsedTopics.length - 1;
+            for(const [index, value] of parsedTopics.entries()) {
+                condition += `'${value.topic}' ${index !== lastIndex ? 'in topics || ' : 'in topics'}`
+            }          
             const payload = {
                 notification: {
                     title: 'KickChat',
-                    body: translate('liveAudioDiscussion', 'en', ''),
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    body: translate('liveAudioDiscussion', locale, ''),
+                    // clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
                 data: {'type': 'liveAudioRoom', 'roomId': roomId},
+                condition: condition.trim(),
             };
-            await admin.messaging().sendToTopic('global', payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -162,18 +169,26 @@ module.exports = {
 
     async sendUpcomingAudioNotificationTags(req, res) {
         try {
-            const { roomId } = req.body;            
+            const { roomId, topic, locale } = req.body;  
+            const parsedTopics = JSON.parse(topic);
+            let condition = '';
+            const lastIndex = parsedTopics.length - 1;
+            for(const [index, value] of parsedTopics.entries()) {
+                condition += `'${value.topic}' ${index !== lastIndex ? 'in topics || ' : 'in topics'}`
+            }          
             const payload = {
                 notification: {
                     title: 'KickChat',
-                    body: translate('discussionRelatedToYourInterest', 'en', ''),
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    body: translate('discussionRelatedToYourInterest', locale, ''),
+                    // clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
                 data: {'type': 'upcomingRoom', 'roomId': roomId},
+                condition: condition.trim(),
             };
-            await admin.messaging().sendToTopic(topicName['topic'], payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
+            console.log(error);
             return res.json(error);
         }
     },
