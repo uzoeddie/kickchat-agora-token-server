@@ -3,6 +3,23 @@ const admin = require('firebase-admin');
 const localeList = ['en', 'es', 'de', 'it', 'pt', 'fr'];
 
 module.exports = {
+    async sendAppUpdateNotification(req, res) {
+        try {
+            const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: 'New version available. Update now.',
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'appUpdate'},
+            };
+            await admin.messaging().sendToTopic('global', payload);
+            return res.json({message: 'Notification sent'});
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
     async sendPushNotification(req, res) {
         try {
             const { token, title, body, payload } = req.body;
