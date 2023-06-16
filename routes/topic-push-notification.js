@@ -4,6 +4,7 @@ const router = express.Router();
 const pushNotificationCtrl = require('../controllers/pushNotificationCtrl');
 
 router.post('/send_app_update_notification', pushNotificationCtrl.sendAppUpdateNotification);
+router.post('/send_match_lineup_notification', pushNotificationCtrl.sendMatchLineUpNotification);
 router.post('/send_push_notification', pushNotificationCtrl.sendPushNotification);
 router.post('/send_poll_notification', pushNotificationCtrl.sendPollNotification);
 router.post('/send_poll_result_notification', pushNotificationCtrl.sendPollResultNotification);

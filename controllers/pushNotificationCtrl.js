@@ -20,6 +20,24 @@ module.exports = {
         }
     },
 
+    async sendMatchLineUpNotification(req, res) {
+        try {
+            const { fixtureId, teams } = req.body;
+            const payload = {
+                notification: {
+                    title: 'Match Lineup',
+                    body: `${teams}`,
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                },
+                data: {'type': 'matchLineup', teams, fixtureId: `${fixtureId}`},
+            };
+            await admin.messaging().sendToTopic('global', payload);
+            return res.json({message: 'Notification sent'});
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
     async sendPushNotification(req, res) {
         try {
             const { token, title, body, payload } = req.body;
