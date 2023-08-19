@@ -6,14 +6,24 @@ module.exports = {
     async sendAppUpdateNotification(req, res) {
         try {
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'appUpdate',
                     title: 'KickChat',
                     body: 'New version available. Update now.',
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'appUpdate'},
+                topic: 'global'
             };
-            await admin.messaging().sendToTopic('global', payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -24,14 +34,26 @@ module.exports = {
         try {
             const { fixtureId, teams } = req.body;
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'matchLineup', 
+                    teams, 
+                    fixtureId: `${fixtureId}`,
                     title: 'Match Lineup',
                     body: `${teams}`,
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'matchLineup', teams, fixtureId: `${fixtureId}`},
+                topic: 'global'
             };
-            await admin.messaging().sendToTopic('global', payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -41,17 +63,27 @@ module.exports = {
     async sendPushNotification(req, res) {
         try {
             const { token, title, body, payload } = req.body;
+            const parsedPayload = JSON.parse(payload);
+            parsedPayload['title'] = title;
+            parsedPayload['body'] = body;
             const payloadBody = {
-                notification: {
-                    title,
-                    body,
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
                 },
-                data: JSON.parse(payload),
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: parsedPayload,
+                token
             };
-            await admin.messaging().sendToDevice(token, payloadBody);
+            await admin.messaging().send(payloadBody);
             return res.json({message: 'Notification sent'});
         } catch (error) {
+            console.log(error);
             return res.json(error);
         }
     },
@@ -60,14 +92,25 @@ module.exports = {
         try {
             const { pollId, question } = req.body;
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'polls', 
+                    'pollId': pollId,
                     title: translate('kickchatPoll', 'en', ''),
                     body: `${question}`,
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'polls', 'pollId': pollId},
+                topic: 'polls'
             };
-            await admin.messaging().sendToTopic('polls', payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
 
         } catch (error) {
@@ -79,14 +122,25 @@ module.exports = {
         try {
             const { pollId, question } = req.body;
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'polls', 
+                    'pollId': pollId,
                     title: translate('kickchatPollResult', 'en', ''),
                     body: `${question}`,
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'polls', 'pollId': pollId},
+                topic: 'polls'
             };
-            await admin.messaging().sendToTopic('polls', payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -102,14 +156,25 @@ module.exports = {
                 newLocale = locale;
             }
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'followersPost', 
+                    'postId': postId,
                     title: 'KickChat',
                     body: translate('userAddedPost', newLocale, `${username}`),
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'followersPost', 'postId': postId},
+                topic
             };
-            await admin.messaging().sendToTopic(topic, payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
 
         } catch (error) {
@@ -121,14 +186,25 @@ module.exports = {
         try {
             const { title, topic, postId } = req.body;
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'followersPost', 
+                    'postId': postId,
                     title: 'Watch match highlights',
                     body: translate(`${title}`, 'en', ''),
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'followersPost', 'postId': postId},
+                topic
             };
-            await admin.messaging().sendToTopic(topic, payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -144,14 +220,25 @@ module.exports = {
                 newLocale = locale;
             }
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'lineupPost', 
+                    'userId': userId,
                     title: 'KickChat',
                     body: translate('userAddedLineup', newLocale, `${username}`),
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'lineupPost', 'userId': userId},
+                topic
             };
-            await admin.messaging().sendToTopic(topic, payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -161,15 +248,24 @@ module.exports = {
     async sendPostReactionNotification(req, res) {
         try {
             const { topic, title, body, payload } = req.body;
+            const parsedPayload = JSON.parse(payload);
+            parsedPayload['title'] = title;
+            parsedPayload['body'] = body;
             const notificationPayload = {
-                notification: {
-                    title,
-                    body,
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
                 },
-                data: JSON.parse(payload),
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: parsedPayload,
+                topic
             };
-            await admin.messaging().sendToTopic(topic, notificationPayload);
+            await admin.messaging().send(notificationPayload);
             return res.json({message: 'Notification sent'});
 
         } catch (error) {
@@ -187,12 +283,22 @@ module.exports = {
                 condition += `'${value.topic}' ${index !== lastIndex ? 'in topics || ' : 'in topics'}`
             }          
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'liveAudioRoom', 
+                    'roomId': roomId,
                     title: 'KickChat',
                     body: translate('liveAudioDiscussion', locale, ''),
-                    // clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'liveAudioRoom', 'roomId': roomId},
                 condition: condition.trim(),
             };
             await admin.messaging().send(payload);
@@ -212,18 +318,27 @@ module.exports = {
                 condition += `'${value.topic}' ${index !== lastIndex ? 'in topics || ' : 'in topics'}`
             }          
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'upcomingRoom', 
+                    'roomId': roomId,
                     title: 'KickChat',
                     body: translate('discussionRelatedToYourInterest', locale, ''),
-                    // clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'upcomingRoom', 'roomId': roomId},
                 condition: condition.trim(),
             };
             await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
-            console.log(error);
             return res.json(error);
         }
     },
@@ -237,14 +352,26 @@ module.exports = {
                 newLocale = locale;
             }
             const payload = {
-                notification: {
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    }
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    }
+                },
+                data: {
+                    'type': 'teamGroup', 
+                    'groupId': groupId, 
+                    'team': team,
                     title: 'KickChat',
                     body: translateWithParams('teamGroupMessage', newLocale, `${group}`, `${team}`),
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
                 },
-                data: {'type': 'teamGroup', 'groupId': groupId, 'team': team},
+                topic
             };
-            await admin.messaging().sendToTopic(topic, payload);
+            await admin.messaging().send(payload);
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
