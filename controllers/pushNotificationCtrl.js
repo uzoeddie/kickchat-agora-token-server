@@ -6,6 +6,10 @@ module.exports = {
     async sendAppUpdateNotification(req, res) {
         try {
             const payload = {
+                notification: { // remove all notification key/value from payload one new update has been approved
+                    title: 'KickChat',
+                    body: 'New version available. Update now.',
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -34,6 +38,10 @@ module.exports = {
         try {
             const { fixtureId, teams } = req.body;
             const payload = {
+                notification: {
+                    title: 'Match Lineup',
+                    body: `${teams}`,
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -67,6 +75,10 @@ module.exports = {
             parsedPayload['title'] = title;
             parsedPayload['body'] = body;
             const payloadBody = {
+                notification: {
+                    title,
+                    body,
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -92,6 +104,10 @@ module.exports = {
         try {
             const { pollId, question } = req.body;
             const payload = {
+                notification: {
+                    title: translate('kickchatPoll', 'en', ''),
+                    body: `${question}`,
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -122,6 +138,10 @@ module.exports = {
         try {
             const { pollId, question } = req.body;
             const payload = {
+                notification: {
+                    title: translate('kickchatPollResult', 'en', ''),
+                    body: `${question}`,
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -156,6 +176,10 @@ module.exports = {
                 newLocale = locale;
             }
             const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translate('userAddedPost', newLocale, `${username}`),
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -186,6 +210,10 @@ module.exports = {
         try {
             const { title, topic, postId } = req.body;
             const payload = {
+                notification: {
+                    title: 'Watch match highlights',
+                    body: translate(`${title}`, 'en', ''),
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -220,6 +248,10 @@ module.exports = {
                 newLocale = locale;
             }
             const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translate('userAddedLineup', newLocale, `${username}`),
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -252,6 +284,10 @@ module.exports = {
             parsedPayload['title'] = title;
             parsedPayload['body'] = body;
             const notificationPayload = {
+                notification: {
+                    title,
+                    body,
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -283,6 +319,10 @@ module.exports = {
                 condition += `'${value.topic}' ${index !== lastIndex ? 'in topics || ' : 'in topics'}`
             }          
             const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translate('liveAudioDiscussion', locale, ''),
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -318,6 +358,10 @@ module.exports = {
                 condition += `'${value.topic}' ${index !== lastIndex ? 'in topics || ' : 'in topics'}`
             }          
             const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translate('discussionRelatedToYourInterest', locale, ''),
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
@@ -352,6 +396,10 @@ module.exports = {
                 newLocale = locale;
             }
             const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: translateWithParams('teamGroupMessage', newLocale, `${group}`, `${team}`),
+                },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
