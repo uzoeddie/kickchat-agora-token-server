@@ -79,6 +79,7 @@ const topicPushNotification = require('./routes/topic-push-notification');
 const health = require('./routes/health');
 const user = require('./routes/user');
 const sms77 = require('./routes/sms77');
+const referral = require('./routes/referral');
 
 app.use('/', index);
 app.use('/', accessToken);
@@ -87,6 +88,7 @@ app.use('/', topicPushNotification);
 app.use('/', health);
 app.use('/', user);
 app.use('/', sms77);
+app.use('/', referral);
 
 app.use((error, req, res, next) => {
     console.error('Error: ', error)

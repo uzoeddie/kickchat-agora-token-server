@@ -6,14 +6,15 @@ module.exports = {
     async sendAppUpdateNotification(req, res) {
         try {
             const payload = {
-                notification: { // remove all notification key/value from payload one new update has been approved
+                notification: {
                     title: 'KickChat',
                     body: 'New version available. Update now.',
                 },
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -45,12 +46,13 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
-                        "apns-priority": "5"
-                    }
+                        "apns-priority": "5",
+                    },
                 },
                 data: {
                     'type': 'matchLineup', 
@@ -82,7 +84,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -111,7 +114,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -145,7 +149,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -183,7 +188,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -217,7 +223,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -255,7 +262,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -271,7 +279,7 @@ module.exports = {
                 topic
             };
             await admin.messaging().send(payload);
-            return res.json({message: 'Notification sent'});
+            return res.json({message: 'Lineup notification sent'});
         } catch (error) {
             return res.json(error);
         }
@@ -291,7 +299,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -326,7 +335,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -365,7 +375,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
@@ -403,7 +414,8 @@ module.exports = {
                 android: {
                     notification: {
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
+                    },
+                    priority: "high",
                 },
                 apns: {
                     headers: {
