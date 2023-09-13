@@ -20,11 +20,11 @@ router.get('/contact', (req, res) => {
     res.render('contact', { nounce: indexNonce });
 });
 
-router.get('/.well-known/assetlinks.json', (req, res) => {
-    assetsLinks[0].target.package_name = process.env.PACKAGE_NAME;
-    assetsLinks[0].target.sha256_cert_fingerprints = JSON.parse(process.env.SHA256);
-    res.send(assetsLinks);
-});
+// router.get('/.well-known/assetlinks.json', (req, res) => {
+//     assetsLinks[0].target.package_name = process.env.PACKAGE_NAME;
+//     assetsLinks[0].target.sha256_cert_fingerprints = JSON.parse(process.env.SHA256);
+//     res.send(assetsLinks);
+// });
 
 router.get('/.well-known/apple-app-site-association', (req, res) => {
     res.send(appleAppSite);
