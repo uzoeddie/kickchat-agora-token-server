@@ -397,7 +397,8 @@ module.exports = {
             return res.json(error);
         }
     },
-
+    
+    // this is not used at the moment
     async sendTeamGroupNotification(req, res) {
         try {
             const { topic, group, team, groupId, locale } = req.body;
