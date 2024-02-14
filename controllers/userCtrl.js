@@ -20,6 +20,18 @@ module.exports = {
         }
     },
 
+    async checkIfUserExist(req, res) {
+        try {
+            const { email } = req.body;
+            const authAdmin = auth.getAuth();
+            const data = await authAdmin.getUserByEmail(email);     
+            const user = await getUserDocument(data?.uid ?? '');
+            return res.status(200).json({message: 'User data', newUser: user === null, user });
+        } catch (error) {
+            return res.status(400).json({message: 'User data does not exist', newUser: true, user: null });
+        }
+    },
+
     // This method is used to send OTP to user's phone
     async sendPhoneNumberOtp(req, res) {
         try {
@@ -39,7 +51,52 @@ module.exports = {
         }
     },
 
+    async verifyNigerianOTP(req, res) {
+        try {
+            const { phoneNumber, otpCode } = req.body;
+            const doc = await getPhoneOtpCode(phoneNumber);
+            if (!doc) {
+                return res.status(400).json({message: 'Incorrect OTP code'});
+            } else {
+                if (otpCode !== `${doc.otp}`) {
+                    return res.status(400).json({message: 'Incorrect OTP code'});
+                } else {
+                    let token = null;
+                    const authAdmin = auth.getAuth();
+                    const data = await authAdmin.getUserByPhoneNumber(phoneNumber);   
+                    const user = await getUserDocument(data?.uid ?? '');
+                    if (user) {
+                        token = await authAdmin.createCustomToken(data.uid);
+                    }
+                    return res.status(200).json({message: 'Phone number verified successfully.', newUser: user === null, user, token});
+                }
+            }
+        } catch (error) {
+            return res.status(400).json({message: 'User data does not exist', newUser: true, user: null, token: null });
+        }
+    },
+
+    async createUserWithNumber(req, res) {
+        try {
+            const { phoneNumber } = req.body;
+            const authAdmin = auth.getAuth();
+            const data = await authAdmin.createUser({
+                phoneNumber,
+                disabled: false,
+                metadata: {
+                    creationTime: new Date().toUTCString(),
+                    lastSignInTime: new Date().toUTCString(),
+                }
+            });
+            const token = await authAdmin.createCustomToken(data.uid);
+            return res.status(200).json({message: 'User created', token, userId: data.uid });
+        } catch (error) {
+            return res.status(400).json({message: 'User not created', token: null, userId: null });
+        }
+    },
+
     // This method is used to verify the OTP and also create a new user.
+    // TODO: to be removed
     async verifyOTPAndCreateUser(req, res) {
         try {
             const { phoneNumber, otpCode } = req.body;
@@ -56,6 +113,7 @@ module.exports = {
     }
 }
 
+// TODO: to be removed
 async function phoneAuthUserExist(res, phoneNumber, otpCode, data) {
     // if user phone auth exist
     const doc = await getPhoneOtpCode(phoneNumber);
@@ -75,6 +133,7 @@ async function phoneAuthUserExist(res, phoneNumber, otpCode, data) {
     }
 }
 
+// TODO: to be removed
 async function phoneNumberUserDoesNotExist(res, phoneNumber, otpCode) {
     // if user phone auth does not exist
     const doc = await getPhoneOtpCode(phoneNumber);
@@ -99,6 +158,7 @@ async function phoneNumberUserDoesNotExist(res, phoneNumber, otpCode) {
     }
 }
 
+// TODO: to be removed
 async function getUserByPhoneNumber(phoneNumber) {
     try {
         const authAdmin = auth.getAuth();
