@@ -9,6 +9,7 @@ const favicon = require('serve-favicon');
 const path = require('path');
 const i18n = require('i18n');
 const http = require('http');
+const cloudinary = require('cloudinary');
 const { indexNonce } = require("./nounce");
 
 const app = express();
@@ -36,6 +37,7 @@ if(process.env.NODE_ENV === 'development') {
     const serviceAccountData = require('/tmp/kickchat-service-account.json');
     adminInitializeApp(serviceAccountData, 'https://kickchat.firebaseio.com');
 }
+cloudinaryConfig();
 
 i18n.configure({
     locales: ['en', 'es', 'de', 'it', 'pt', 'fr'],
@@ -84,6 +86,7 @@ const health = require('./routes/health');
 const user = require('./routes/user');
 const sms77 = require('./routes/sms77');
 const referral = require('./routes/referral');
+const fileUpload = require('./routes/file-upload');
 
 app.use('/', index);
 app.use('/', accessToken);
@@ -93,6 +96,7 @@ app.use('/', health);
 app.use('/', user);
 app.use('/', sms77);
 app.use('/', referral);
+app.use('/', fileUpload);
 
 app.use((error, req, res, next) => {
     console.error('Error: ', error)
@@ -109,3 +113,11 @@ function adminInitializeApp(serviceAccountJson, databaseURL) {
         databaseURL
     });    
 }
+
+function cloudinaryConfig() {
+    cloudinary.v2.config({
+      cloud_name: process.env.CLOUD_NAME,
+      api_key: process.env.CLOUD_API_KEY,
+      api_secret: process.env.CLOUD_API_SECRET
+    });
+  }
