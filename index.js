@@ -108,16 +108,18 @@ server.listen(PORT, () => {
 });
 
 function adminInitializeApp(serviceAccountJson, databaseURL) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountJson), 
-        databaseURL
-    });    
+    if (!admin.apps.length) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccountJson), 
+            databaseURL
+        });    
+    }
 }
 
 function cloudinaryConfig() {
     cloudinary.v2.config({
-      cloud_name: process.env.CLOUD_NAME,
-      api_key: process.env.CLOUD_API_KEY,
-      api_secret: process.env.CLOUD_API_SECRET
+        cloud_name: process.env.CLOUD_NAME,
+        api_key: process.env.CLOUD_API_KEY,
+        api_secret: process.env.CLOUD_API_SECRET
     });
-  }
+}
