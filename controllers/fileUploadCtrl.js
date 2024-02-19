@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary');
 const axios = require('axios');
-const { createCanvas } = require('canvas');
+const { createCanvas, registerFont } = require('canvas');
 
 module.exports = {
     async convertSocialProfileUrlToImageAndUpload(req, res) {
@@ -26,7 +26,6 @@ module.exports = {
 
     async createUserAvatar(req, res) {
         try {
-            console.log(req.body);
             const { avatarColor, username } = req.body;
             const avatar = generateAvatar(username.charAt(0).toUpperCase(), avatarColor);
             const result = await Promise.resolve(cloudinary.v2.uploader.upload(avatar, { 
@@ -42,13 +41,14 @@ module.exports = {
 }
 
 function generateAvatar(text, backgroundColor, foregroundColor = 'white') {
+    registerFont('public/fonts/OpenSans-Regular.ttf', { family: 'sans-serif' })
     const canvas = createCanvas(200, 200);
     const context = canvas.getContext('2d');
 
     context.fillStyle = backgroundColor;
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // context.font = 'normal 80px sans-serif';
+    context.font = '80px "sans-serif"';
     context.fillStyle = foregroundColor;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
