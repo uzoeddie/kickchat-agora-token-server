@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
 const { FieldValue } = require('firebase-admin/firestore');
 const axios = require('axios');
+const helperMethods = require('./helper');
 
 const REFERRALS = 'referrals';
 
@@ -21,7 +22,7 @@ module.exports = {
     async createBranchDeepLink(req, res) {
         try {
             const { alias } = req.body;
-            const referralId = getRandomString(28);
+            const referralId = helperMethods.getRandomString(28);
             const url = 'https://api2.branch.io/v1/url';
             const response = await axios.post(url, {
                 branch_key: process.env.BRANCH_KEY,
@@ -58,13 +59,4 @@ module.exports = {
             return res.json(error);
         }
     }
-}
-
-function getRandomString(length) {
-    var randomChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-    var result = '';
-    for ( var i = 0; i < length; i++ ) {
-        result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-    }
-    return result;
 }

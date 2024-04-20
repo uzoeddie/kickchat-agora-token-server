@@ -1,10 +1,14 @@
 const admin = require('firebase-admin');
+const helperMethods = require('./helper');
+const { Timestamp } = require('firebase-admin/firestore');
 
 const localeList = ['en', 'es', 'de', 'it', 'pt', 'fr'];
+const PUSH_NOTIFICATION = 'push_notifications';
 
 module.exports = {
     async sendAppUpdateNotification(req, res) {
         try {
+            const pushId = helperMethods.getRandomString(28);
             const payload = {
                 notification: {
                     title: 'KickChat',
@@ -23,12 +27,20 @@ module.exports = {
                 },
                 data: {
                     'type': 'appUpdate',
+                    'pushId': pushId,
                     title: 'KickChat',
                     body: 'New version available. Update now.',
                 },
                 topic: 'global'
+                // token: 'ddEzy7EhRvOPqaU2fdk3-I:APA91bEzPU1vossPLEh0UIuJNibFFluacCQCp-S8U9wV8GI0Gxfr_uRKZpXTVUb98SW2CQ-G0p2PILKE-jKfQ9ucz3VJ-cqW5YEbOUdVZvxBNINs2XiTxXDSogpufBwkLPII5MFdMJHa'
             };
             await admin.messaging().send(payload);
+            await savePushNotification('App update notification', pushId, 'appUpdate', 0, {
+                'type': 'appUpdate',
+                'pushId': pushId,
+                title: 'KickChat',
+                body: 'New version available. Update now.',
+            });
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -37,6 +49,7 @@ module.exports = {
 
     async sendMatchLineUpNotification(req, res) {
         try {
+            const pushId = helperMethods.getRandomString(28);
             const { fixtureId, teams } = req.body;
             const payload = {
                 notification: {
@@ -56,6 +69,7 @@ module.exports = {
                 },
                 data: {
                     'type': 'matchLineup', 
+                    'pushId': pushId,
                     teams, 
                     fixtureId: `${fixtureId}`,
                     title: 'Match Lineup',
@@ -64,6 +78,20 @@ module.exports = {
                 topic: 'global'
             };
             await admin.messaging().send(payload);
+            await savePushNotification(
+                'Match lineup notification', 
+                pushId, 
+                'matchLineup', 
+                0,
+                {
+                    'type': 'matchLineup', 
+                    'pushId': pushId,
+                    teams, 
+                    fixtureId: `${fixtureId}`,
+                    title: 'Match Lineup',
+                    body: `${teams}`,
+                }
+            );
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -105,6 +133,7 @@ module.exports = {
 
     async sendPollNotification(req, res) {
         try {
+            const pushId = helperMethods.getRandomString(28);
             const { pollId, question } = req.body;
             const payload = {
                 notification: {
@@ -125,12 +154,21 @@ module.exports = {
                 data: {
                     'type': 'polls', 
                     'pollId': pollId,
+                    'pushId': pushId,
                     title: translate('kickchatPoll', 'en', ''),
                     body: `${question}`,
                 },
-                topic: 'polls'
+                // topic: 'polls'
+                token: 'ddEzy7EhRvOPqaU2fdk3-I:APA91bEzPU1vossPLEh0UIuJNibFFluacCQCp-S8U9wV8GI0Gxfr_uRKZpXTVUb98SW2CQ-G0p2PILKE-jKfQ9ucz3VJ-cqW5YEbOUdVZvxBNINs2XiTxXDSogpufBwkLPII5MFdMJHa'
             };
             await admin.messaging().send(payload);
+            await savePushNotification('Poll notification', pushId, 'polls', 0, {
+                'type': 'polls', 
+                'pollId': pollId,
+                'pushId': pushId,
+                title: translate('kickchatPoll', 'en', ''),
+                body: `${question}`,
+            });
             return res.json({message: 'Notification sent'});
 
         } catch (error) {
@@ -214,6 +252,7 @@ module.exports = {
 
     async sendVideoAddedNotification(req, res) {
         try {
+            const pushId = helperMethods.getRandomString(28);
             const { title, topic, postId } = req.body;
             const payload = {
                 notification: {
@@ -234,12 +273,22 @@ module.exports = {
                 data: {
                     'type': 'followersPost', 
                     'postId': postId,
+                    'pushId': pushId,
+                    'notificationType': 'videoHighlights',
                     title: 'Watch match highlights',
                     body: translate(`${title}`, 'en', ''),
                 },
                 topic
             };
             await admin.messaging().send(payload);
+            await savePushNotification('Watch match highlights', pushId, 'followersPost', 0, {
+                'type': 'followersPost', 
+                'postId': postId,
+                'pushId': pushId,
+                'notificationType': 'videoHighlights',
+                title: 'Watch match highlights',
+                body: translate(`${title}`, 'en', ''),
+            });
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -320,6 +369,7 @@ module.exports = {
 
     async sendLiveAudioNotificationTags(req, res) {
         try {
+            const pushId = helperMethods.getRandomString(28);
             const { roomId, topic, locale } = req.body;
             const parsedTopics = JSON.parse(topic);
             let condition = '';
@@ -346,12 +396,20 @@ module.exports = {
                 data: {
                     'type': 'liveAudioRoom', 
                     'roomId': roomId,
+                    'pushId': pushId,
                     title: 'KickChat',
                     body: translate('liveAudioDiscussion', locale, ''),
                 },
                 condition: condition.trim(),
             };
             await admin.messaging().send(payload);
+            await savePushNotification('Create live audio room', pushId, 'liveAudioRoom', 0, {
+                'type': 'liveAudioRoom', 
+                'roomId': roomId,
+                'pushId': pushId,
+                title: 'KickChat',
+                body: translate('liveAudioDiscussion', 'en', ''),
+            });
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
@@ -446,4 +504,19 @@ function translate(phrase, locale, ph) {
 
 function translateWithParams(phrase, locale, param1, param2) {
     return __({ phrase, locale }, param1, param2);
+}
+
+async function savePushNotification(title, pushId, type, usersOpenCount, data) {
+    try {
+        await admin.firestore().collection(PUSH_NOTIFICATION).doc(pushId).set({
+            title,
+            pushId,
+            type,
+            usersOpenCount,
+            data,
+            createdAt: Timestamp.now()
+        });
+    } catch (error) {
+        return null;
+    }
 }
