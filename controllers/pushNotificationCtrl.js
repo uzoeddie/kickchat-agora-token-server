@@ -32,7 +32,6 @@ module.exports = {
                     body: 'New version available. Update now.',
                 },
                 topic: 'global'
-                // token: 'ddEzy7EhRvOPqaU2fdk3-I:APA91bEzPU1vossPLEh0UIuJNibFFluacCQCp-S8U9wV8GI0Gxfr_uRKZpXTVUb98SW2CQ-G0p2PILKE-jKfQ9ucz3VJ-cqW5YEbOUdVZvxBNINs2XiTxXDSogpufBwkLPII5MFdMJHa'
             };
             await admin.messaging().send(payload);
             await savePushNotification('App update notification', pushId, 'appUpdate', 0, {
@@ -158,8 +157,7 @@ module.exports = {
                     title: translate('kickchatPoll', 'en', ''),
                     body: `${question}`,
                 },
-                // topic: 'polls'
-                token: 'ddEzy7EhRvOPqaU2fdk3-I:APA91bEzPU1vossPLEh0UIuJNibFFluacCQCp-S8U9wV8GI0Gxfr_uRKZpXTVUb98SW2CQ-G0p2PILKE-jKfQ9ucz3VJ-cqW5YEbOUdVZvxBNINs2XiTxXDSogpufBwkLPII5MFdMJHa'
+                topic: 'polls'
             };
             await admin.messaging().send(payload);
             await savePushNotification('Poll notification', pushId, 'polls', 0, {
