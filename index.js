@@ -87,6 +87,7 @@ const user = require('./routes/user');
 const sms77 = require('./routes/sms77');
 const referral = require('./routes/referral');
 const fileUpload = require('./routes/file-upload');
+const news = require('./routes/news');
 
 app.use('/', index);
 app.use('/', accessToken);
@@ -97,6 +98,7 @@ app.use('/', user);
 app.use('/', sms77);
 app.use('/', referral);
 app.use('/', fileUpload);
+app.use('/news', news);
 
 app.use((error, req, res, next) => {
     console.error('Error: ', error)

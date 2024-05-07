@@ -125,7 +125,6 @@ module.exports = {
             await admin.messaging().send(payloadBody);
             return res.json({message: 'Notification sent'});
         } catch (error) {
-            console.log(error);
             return res.json(error);
         }
     },
@@ -448,6 +447,58 @@ module.exports = {
                 condition: condition.trim(),
             };
             await admin.messaging().send(payload);
+            return res.json({message: 'Notification sent'});
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
+    async sendNewsNotification(req, res) {
+        try {
+            const pushId = helperMethods.getRandomString(28);
+            const { title, newsLink, img } = req.body;
+            const payload = {
+                notification: {
+                    title: 'KickChat',
+                    body: title,
+                },
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    },
+                    priority: "high",
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5",
+                    },
+                },
+                data: {
+                    'type': 'newsLink', 
+                    'pushId': pushId,
+                    newsLink,
+                    title: 'KickChat',
+                    img,
+                    body: title,
+                },
+                topic: 'global'
+                // token: 'f3dIWDvt4EcVjMYA64_qKU:APA91bFYJGT3zpk_jjd5wbsE_kRYQyFUUepXzFNzJMVCZ0QDKidp-h53JxGTQyDB9ljT0lUiww7LxX-ePaePB1FM9KZSv_WxTJ2jFSkfWhJsR-AkQC7REkbNTnPbV2TdoTRhuDJicUVE'
+            };
+            await admin.messaging().send(payload);
+            await savePushNotification(
+                'News notification', 
+                pushId, 
+                'newsLink', 
+                0,
+                {
+                    'type': 'newsLink', 
+                    'pushId': pushId,
+                    newsLink,
+                    title: 'KickChat',
+                    img,
+                    body: title,
+                }
+            );
             return res.json({message: 'Notification sent'});
         } catch (error) {
             return res.json(error);
