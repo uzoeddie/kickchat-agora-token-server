@@ -268,21 +268,19 @@ module.exports = {
                     }
                 },
                 data: {
-                    'type': 'followersPost', 
+                    'type': 'videoHighlights', 
                     'postId': postId,
                     'pushId': pushId,
-                    'notificationType': 'videoHighlights',
                     title: 'Watch match highlights',
                     body: translate(`${title}`, 'en', ''),
                 },
                 topic
             };
             await admin.messaging().send(payload);
-            await savePushNotification('Watch match highlights', pushId, 'followersPost', 0, {
-                'type': 'followersPost', 
+            await savePushNotification('Watch match highlights', pushId, 'videoHighlights', 0, {
+                'type': 'videoHighlights', 
                 'postId': postId,
                 'pushId': pushId,
-                'notificationType': 'videoHighlights',
                 title: 'Watch match highlights',
                 body: translate(`${title}`, 'en', ''),
             });

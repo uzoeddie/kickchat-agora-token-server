@@ -37,12 +37,13 @@ module.exports = {
                 "https://onefootball.com" + $(this).find("a").eq(1).attr("href");
                 const img = $(this).find("img").attr("src");
                 const time = $(this).find('footer').find('time').text();
+                const source = $(this).find("picture").children('source').last().attr("srcset");
         
                 if (title !== "") {
                     news_array_onefootball.push({
                         title,
                         url,
-                        img,
+                        img: source ? source : img,
                         time,
                         shortDesc,
                         website: 'Onefootball'
@@ -135,10 +136,14 @@ module.exports = {
                 if (!url || !title) {
                     return;
                 }
+                const imgList = img && img.split('.');
+                const newImgList = img && imgList[imgList.length - 2].split('-');
+                const width = img && newImgList[newImgList.length - 2];
+                const newImg = img && img.replace(width, '840');
                 news_array_fourfourtwo.push({
                     url,
                     title,
-                    img,
+                    img: newImg,
                     time,
                     shortDesc,
                     website: 'FourFourtwo'
@@ -163,10 +168,16 @@ module.exports = {
                 if (!url || !title) {
                     return;
                 }
+                const imgList = img && img.split('?');
+                const newImgList = img && imgList[imgList.length - 1].split('&');
+                const operations = img && newImgList[newImgList.length - 3];
+                const width = img && newImgList[newImgList.length - 2];
+                const replacedHeight = img && img.replace(operations, 'operations=fit(840:)');
+                const newImg = img && replacedHeight.replace(width, 'w=840');
                 news_array_livescores.push({
                     url,
                     title,
-                    img,
+                    img: newImg,
                     time,
                     shortDesc: '',
                     website: 'LiveScores'
