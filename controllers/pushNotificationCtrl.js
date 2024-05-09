@@ -456,7 +456,7 @@ module.exports = {
     async sendNewsNotification(req, res) {
         try {
             const pushId = helperMethods.getRandomString(28);
-            const { title, newsLink, img } = req.body;
+            const { title, newsLink, img, time, shortDesc, website } = req.body;
             const payload = {
                 notification: {
                     title: 'KickChat',
@@ -479,10 +479,12 @@ module.exports = {
                     newsLink,
                     title: 'KickChat',
                     img,
+                    time,
+                    website,
+                    shortDesc,
                     body: title,
                 },
                 topic: 'global'
-                // token: 'f3dIWDvt4EcVjMYA64_qKU:APA91bFYJGT3zpk_jjd5wbsE_kRYQyFUUepXzFNzJMVCZ0QDKidp-h53JxGTQyDB9ljT0lUiww7LxX-ePaePB1FM9KZSv_WxTJ2jFSkfWhJsR-AkQC7REkbNTnPbV2TdoTRhuDJicUVE'
             };
             await admin.messaging().send(payload);
             await savePushNotification(

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require("cheerio");
+const moment = require("moment");
 
 const news_array_onefootball = [];
 const news_array_espn = [];
@@ -31,15 +32,19 @@ module.exports = {
             const $ = cheerio.load(html1);
             $("li", html1).each(function () {
                 const title = $(this).find("a").eq(1).find("p").eq(0).text();
+                const shortDesc = $(this).find("a").eq(1).find("p").eq(1).text();
                 const url =
                 "https://onefootball.com" + $(this).find("a").eq(1).attr("href");
                 const img = $(this).find("img").attr("src");
+                const time = $(this).find('footer').find('time').text();
         
                 if (title !== "") {
                     news_array_onefootball.push({
                         title,
                         url,
                         img,
+                        time,
+                        shortDesc,
                         website: 'Onefootball'
                     });
                 }
@@ -58,13 +63,17 @@ module.exports = {
       
             $("a", html).each(function () {
                 const title = $(this).find("h2").text();
+                const shortDesc = $(this).find('p').text();
                 const url = "https://www.espn.in" + $(this).attr("href");
                 const img = $(this).find("img").attr("data-default-src");
+                const time = $(this).find('.contentMeta__timestamp').text();
                 if (url.includes("story") && title !== "") {
                     news_array_espn.push({
                         title,
                         url,
                         img,
+                        time,
+                        shortDesc,
                         website: 'ESPN'
                     });
                 }
@@ -88,7 +97,9 @@ module.exports = {
                 );
                 const url = "https://goal.com" + $(this).find("a").attr("href");
                 const title = $(this).find("h3").text();
+                const shortDesc = $(this).find("p.teaser").text();
                 const img = $(this).find("img").attr("src");
+                const time = $(this).find('footer').find("time").attr("datetime");
                 const modifiedTitle = title.replace(pattern, "");
         
                 if (url.includes("lists") && title !== "") {
@@ -96,13 +107,14 @@ module.exports = {
                         url,
                         title: modifiedTitle,
                         img,
+                        time: moment(new Date(time)).format('LL'),
+                        shortDesc,
                         website: 'GOAL'
                     });
                 }
             });
             res.json(news_array_goaldotcom);
         } catch (error) {
-            console.log(error);
             return res.json(error);
         }
     },
@@ -118,7 +130,8 @@ module.exports = {
                 const imgSplitted = $(element).find("img").attr("srcset");
                 const news_img = imgSplitted ? imgSplitted.split(" ") : null;
                 const img = news_img ? news_img[0] : null;
-                const short_desc = $(element).find("p.synopsis").text()?.trim();
+                const shortDesc = $(element).find("p.synopsis").text()?.trim();
+                const time = $(element).find("time").text();
                 if (!url || !title) {
                     return;
                 }
@@ -126,7 +139,8 @@ module.exports = {
                     url,
                     title,
                     img,
-                    short_desc,
+                    time,
+                    shortDesc,
                     website: 'FourFourtwo'
                 });
             });
@@ -144,7 +158,8 @@ module.exports = {
             $(".Mi", html).each(function (index, element) {
                 const url = `https://www.livescore.com${$(element).find("a").attr("href")}`;
                 const title = $(element).find("h2.gl").text();
-                const img = $(element).find("img").attr("src");;
+                const img = $(element).find("img").attr("src");
+                const time = $(element).find("a").find("div.nl").text();
                 if (!url || !title) {
                     return;
                 }
@@ -152,6 +167,8 @@ module.exports = {
                     url,
                     title,
                     img,
+                    time,
+                    shortDesc: '',
                     website: 'LiveScores'
                 });
             });
