@@ -267,10 +267,12 @@ module.exports = {
                         "apns-priority": "5"
                     }
                 },
+                // TODO: change type to videoHighlights and remove notificationType after new version is released
                 data: {
-                    'type': 'videoHighlights', 
+                    'type': 'followersPost', 
                     'postId': postId,
                     'pushId': pushId,
+                    'notificationType': 'videoHighlights',
                     title: 'Watch match highlights',
                     body: translate(`${title}`, 'en', ''),
                 },
