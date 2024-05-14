@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@treblle/express": "^0.0.8",
     "agora-access-token": "^2.0.4",
     "axios": "^1.6.7",
     "canvas": "^2.11.2",
