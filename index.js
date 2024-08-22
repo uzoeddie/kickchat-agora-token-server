@@ -62,13 +62,13 @@ app.use(function (req, res, next) {
     );
     next();
 });
-app.use(
-    treblle({
-        apiKey: process.env.TREBLLE_API_KEY,
-        projectId: process.env.TREBLLE_PROJECT_ID,
-        additionalFieldsToMask: [],
-    })
-);
+// app.use(
+//     treblle({
+//         apiKey: process.env.TREBLLE_API_KEY,
+//         projectId: process.env.TREBLLE_PROJECT_ID,
+//         additionalFieldsToMask: [],
+//     })
+// );
 
 app.use(helmet({
     // this is set for content security policy

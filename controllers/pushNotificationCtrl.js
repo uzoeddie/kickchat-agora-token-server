@@ -250,11 +250,11 @@ module.exports = {
     async sendVideoAddedNotification(req, res) {
         try {
             const pushId = helperMethods.getRandomString(28);
-            const { title, topic, postId } = req.body;
+            const { title, topic, postId, body } = req.body;
             const payload = {
                 notification: {
-                    title: 'Watch match highlights',
-                    body: translate(`${title}`, 'en', ''),
+                    title,
+                    body: translate(`${body}`, 'en', ''),
                 },
                 android: {
                     notification: {
@@ -267,24 +267,23 @@ module.exports = {
                         "apns-priority": "5"
                     }
                 },
-                // TODO: change type to videoHighlights and remove notificationType after new version is released
                 data: {
                     'type': 'followersPost', 
                     'postId': postId,
                     'pushId': pushId,
                     'notificationType': 'videoHighlights',
-                    title: 'Watch match highlights',
-                    body: translate(`${title}`, 'en', ''),
+                    title,
+                    body: translate(`${body}`, 'en', ''),
                 },
                 topic
             };
             await admin.messaging().send(payload);
-            await savePushNotification('Watch match highlights', pushId, 'videoHighlights', 0, {
+            await savePushNotification(`${title}`, pushId, 'videoHighlights', 0, {
                 'type': 'videoHighlights', 
                 'postId': postId,
                 'pushId': pushId,
-                title: 'Watch match highlights',
-                body: translate(`${title}`, 'en', ''),
+                title,
+                body: translate(`${body}`, 'en', ''),
             });
             return res.json({message: 'Notification sent'});
         } catch (error) {
