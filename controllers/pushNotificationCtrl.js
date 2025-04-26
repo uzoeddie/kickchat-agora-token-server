@@ -97,6 +97,41 @@ module.exports = {
         }
     },
 
+    async sendPlayerRatingNotification(req, res) {
+        try {
+            const { id, teams } = req.body;
+            const payload = {
+                notification: {
+                    title: 'Vote for Best Player',
+                    body: `${teams}`,
+                },
+                android: {
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    },
+                    priority: "high",
+                },
+                apns: {
+                    headers: {
+                        "apns-priority": "5",
+                    },
+                },
+                data: {
+                    'type': 'addPlayerRatings', 
+                    matchId: id,
+                    teams, 
+                    title: 'Vote for Best Player',
+                    body: `${teams}`,
+                },
+                topic: 'global'
+            };
+            await admin.messaging().send(payload);
+            return res.json({message: 'Notification sent'});
+        } catch (error) {
+            return res.json(error);
+        }
+    },
+
     async sendPushNotification(req, res) {
         try {
             const { token, title, body, payload } = req.body;
