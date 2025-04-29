@@ -7,14 +7,20 @@ module.exports = {
         try {
             const { to, message } = req.body;
             let recipient = to.replace(/ /g,'');
-            const params = {
-                p: process.env.SMS77_API_KEY,
-                to: recipient,
-                text: message,
-                from: 'KickChat',
-                return_msg_id: 1
-            };
-            await axios(requestOptions(params));
+            await axios({
+                method: 'POST',
+                url: 'https://gateway.seven.io/api/sms',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Api-Key': process.env.SEVEN_IO_KEY
+                },
+                data: {
+                    'from': 'KickChat',
+                    'to': recipient,
+                    "text": message
+                }
+            });
 
             return res.json({message: 'SMS sent'});
         } catch (error) {
@@ -22,11 +28,3 @@ module.exports = {
         }
     }
 };
-
-function requestOptions(params) {
-    return {
-        method: 'GET',
-        url: API_URL,
-        params,
-    };
-}
