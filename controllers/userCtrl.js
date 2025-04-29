@@ -35,7 +35,9 @@ module.exports = {
     // This method is used to send OTP to user's phone
     async sendPhoneNumberOtp(req, res) {
         try {
+            console.log(req.body);
             const { phoneNumber, country } = req.body;
+            const nigerianNumber = isNigerianNumber(phoneNumber);
             // min 6 digits and max 6 digits
             const otpCode = crypto.randomInt(10**5, 10**6-1);
             // Step 1 - save the otp to firestore database
@@ -44,11 +46,12 @@ module.exports = {
                 otp: otpCode
             });
             // Step 2 - send the otp sms message
-            if (country === 'Nigeria') {
+            if (nigerianNumber) {
                 await axios(kudiRequestOptions(phoneNumber, otpCode));
             } else {
                 await axios(sevenIORequestOptions(phoneNumber, otpCode));
             }
+            console.log(`otpCode - ${otpCode}`);
             return res.status(200).json({message: '6 digit OTP sent.', otpCode });
         } catch (error) {
             return res.status(400).json({message: 'Phone number authentication failed.'});
@@ -159,4 +162,12 @@ function sevenIORequestOptions(phoneNumber, otpCode) {
             "text": `${otpCode} is your verification code`
         }
     };
+}
+
+function isNigerianNumber(phoneNumber) {
+    // Remove any whitespace from the phone number
+    const cleanNumber = phoneNumber.replace(/\s+/g, '');
+
+    // Check if the phone number starts with +234
+    return cleanNumber.startsWith('+234');
 }
