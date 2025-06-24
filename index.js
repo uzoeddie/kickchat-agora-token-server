@@ -10,7 +10,7 @@ const path = require('path');
 const i18n = require('i18n');
 const http = require('http');
 const cloudinary = require('cloudinary');
-const treblle = require('@treblle/express');
+const rateLimit = require('express-rate-limit');
 const { indexNonce } = require("./nounce");
 
 const app = express();
@@ -55,20 +55,13 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
-app.use(function (req, res, next) {
+app.use(function (_req, res, next) {
     res.setHeader(
         'Content-Security-Policy',
         "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; font-src 'self'; img-src 'self'; frame-src 'self'; connect-src 'self';"
     );
     next();
 });
-// app.use(
-//     treblle({
-//         apiKey: process.env.TREBLLE_API_KEY,
-//         projectId: process.env.TREBLLE_PROJECT_ID,
-//         additionalFieldsToMask: [],
-//     })
-// );
 
 app.use(helmet({
     // this is set for content security policy
@@ -85,6 +78,13 @@ app.use(helmet({
 }));
 app.use(express.json({}));
 app.use(express.urlencoded({ extended: true }));
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 2 * 60 * 1000, // 2 minutes
+    max: 2, // limit each IP to 2 requests per windowMs
+    message: 'To many requests error.'
+});
+app.use('/search-football-facts', limiter);
 
 const index = require('./controllers/indexCtrl');
 const accessToken = require('./routes/access-token');
@@ -96,6 +96,7 @@ const sms77 = require('./routes/sms77');
 const referral = require('./routes/referral');
 const fileUpload = require('./routes/file-upload');
 const news = require('./routes/news');
+const ai = require('./routes/ai');
 
 app.use('/', index);
 app.use('/', accessToken);
@@ -106,6 +107,7 @@ app.use('/', user);
 app.use('/', sms77);
 app.use('/', referral);
 app.use('/', fileUpload);
+app.use('/', ai);
 app.use('/news', news);
 
 app.use((error, req, res, next) => {
