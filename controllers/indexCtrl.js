@@ -30,4 +30,19 @@ router.get('/.well-known/apple-app-site-association', (req, res) => {
     res.send(appleAppSite);
 });
 
+router.get('/track', (req, res) => {
+    const id = req.query.id;
+    console.log(`Email opened with ID: ${id}`);
+
+    res.setHeader('Content-Type', 'image/gif');
+    res.send(Buffer.from(
+        'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=',
+        'base64'
+    ));
+});
+
+router.get('/health/track', (req, res) => {
+    res.send('Testing track router is deployed...');
+});
+
 module.exports = router;
