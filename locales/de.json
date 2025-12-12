@@ -4,5 +4,7 @@
     "userAddedPost": "%s hat einen neuen Beitrag hinzugefügt.",
     "kickchatPoll": "KickChat-Umfrage. Jetzt abstimmen.",
     "kickchatPollResult": "Umfrageergebnis anzeigen",
-    "userAddedLineup": "%s eine neue Fußballaufstellung hinzugefügt."
+    "userAddedLineup": "%s eine neue Fußballaufstellung hinzugefügt.",
+    "footballFactTitle": "Fußball-Fakt",
+    "footballFactBody": "Schauen Sie sich diese interessante Fußball-Fakt an!"
 }

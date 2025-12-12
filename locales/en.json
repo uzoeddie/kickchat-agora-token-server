@@ -5,5 +5,7 @@
     "userAddedLineup": "%s added a new footbal lineup.",
     "kickchatPoll": "KickChat poll. Vote now.",
     "kickchatPollResult": "View poll result",
-    "teamGroupMessage": "A new chat group %s was added for %s. Click to join."
+    "teamGroupMessage": "A new chat group %s was added for %s. Click to join.",
+    "footballFactTitle": "Football Fact",
+    "footballFactBody": "Check out this interesting football fact!"
 }

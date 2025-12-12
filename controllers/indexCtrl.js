@@ -37,47 +37,4 @@ router.get('/.well-known/apple-app-site-association', (req, res) => {
     res.send(appleAppSite);
 });
 
-router.get('/track', (req, res) => {
-  const emailId = req.query.id;
-  const userAgent = req.get('User-Agent');
-  const timestamp = new Date().toISOString();
-  const ip = req.ip || req.connection.remoteAddress;
-  
-  console.log(`Email opened: ${emailId} at ${timestamp} from ${ip}`);
-  console.log(`User Agent: ${userAgent}`);
-  
-  // Store the open event (in production, use a database)
-  // For now, we'll just serve the pixel and log the event
-  
-  // Send the tracking pixel
-  res.set({
-    'Content-Type': 'image/gif',
-    'Content-Length': transparentPixel.length,
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
-    'Access-Control-Allow-Origin': '*'
-  });
-  
-  res.send(transparentPixel);
-});
-
-// Webhook endpoint for email opens (alternative approach)
-router.post('/webhook/opened', express.json(), (req, res) => {
-  const { emailId, timestamp, userAgent } = req.body;
-  
-  console.log(`Webhook: Email ${emailId} opened at ${timestamp}`);
-  
-  // Here you could:
-  // 1. Store in database
-  // 2. Send push notification to extension
-  // 3. Update real-time dashboard
-  
-  res.json({ success: true, received: true });
-});
-
-router.get('/health/track', (req, res) => {
-    res.send('Testing track router is deployed (updated)...');
-});
-
 module.exports = router;
