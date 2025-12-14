@@ -44,12 +44,13 @@ module.exports = {
 
             // Validate email exists
             if (!email || typeof email !== 'string') {
-                return res.status(400).json({
+                return res.status(200).json({
                     valid: false,
                     error: 'Email is required',
                     // remove this in 2026
                     // the latest version of the mobile app does not use these validators field
                     // it's only here for backward compatibility
+                    // I used 200 for the error code so that the frontend doesn't handle it that was
                     validators: {
                         regex: { valid: false },
                         typo: { valid: false },
@@ -66,7 +67,7 @@ module.exports = {
 
             // Check for valid email format
             if (atIndex === -1 || atIndex === 0 || atIndex === emailLower.length - 1) {
-                return res.status(400).json({
+                return res.status(200).json({
                     valid: false,
                     error: 'Invalid email format',
                     validators: {
@@ -84,7 +85,7 @@ module.exports = {
             const records = await getMXRecords(domain);
             const hasMXRecord = records && records.length > 0 && records[0].exchange !== ''
             if (!hasMXRecord) {
-                return res.status(400).json({
+                return res.status(200).json({
                     valid: false,
                     message: 'Email domain does not have valid mail servers',
                     validators: {
@@ -100,7 +101,7 @@ module.exports = {
             if (records.length > 0 && records[0].exchange !== '') {
                 const result = await checkSMTPConnection(records[0].exchange, 2000);
                 if (!result) {
-                    return res.status(400).json({
+                    return res.status(200).json({
                         valid: false,
                         message: 'Email domain does not have valid mail servers',
                         validators: {
@@ -117,7 +118,7 @@ module.exports = {
             // Check if domain is disposable (SUPER FAST - O(1) lookup!)
             const isDisposable = disposableDomains.has(domain);
             if (isDisposable) {
-                return res.status(400).json({
+                return res.status(200).json({
                     valid: false,
                     message: 'Disposable email addresses are not allowed',
                     validators: {
