@@ -1,190 +1,261 @@
-const auth = require('firebase-admin/auth');
-const axios = require('axios');
-const admin = require('firebase-admin');
+const auth = require("firebase-admin/auth");
+const axios = require("axios");
+const admin = require("firebase-admin");
 const crypto = require("crypto");
-const { getFirestore } = require('firebase-admin/firestore');
+const { getFirestore } = require("firebase-admin/firestore");
 
 const db = getFirestore();
-const PHONE_OTPS = 'phone_otps';
+const PHONE_OTPS = "phone_otps";
 
 module.exports = {
-    async deleteAdminUser(req, res) {
-        try {
-            const { uid } = req.body;
-            const authAdmin = auth.getAuth();
-            await authAdmin.deleteUser(uid);
-            return res.json({message: 'Auth user deleted'});
+  async deleteAdminUser(req, res) {
+    try {
+      const { uid } = req.body;
+      const authAdmin = auth.getAuth();
+      await authAdmin.deleteUser(uid);
+      return res.json({ message: "Auth user deleted" });
+    } catch (error) {
+      return res.json(error);
+    }
+  },
 
-        } catch (error) {
-            return res.json(error);
-        }
-    },
+  async checkIfUserExist(req, res) {
+    try {
+      const { email } = req.body;
+      const authAdmin = auth.getAuth();
+      const data = await authAdmin.getUserByEmail(email);
+      const user = await getUserDocument(data?.uid ?? "");
+      return res
+        .status(200)
+        .json({ message: "User data", newUser: user === null, user });
+    } catch (error) {
+      return res.json({
+        message: "User data does not exist",
+        newUser: true,
+        user: null,
+      });
+    }
+  },
 
-    async checkIfUserExist(req, res) {
-        try {
-            const { email } = req.body;
-            const authAdmin = auth.getAuth();
-            const data = await authAdmin.getUserByEmail(email);     
-            const user = await getUserDocument(data?.uid ?? '');
-            return res.status(200).json({message: 'User data', newUser: user === null, user });
-        } catch (error) {
-            return res.status(400).json({message: 'User data does not exist', newUser: true, user: null });
-        }
-    },
+  async checkIfEmailExist(req, res) {
+    try {
+      const { email } = req.body;
+      const authAdmin = auth.getAuth();
+      const data = await authAdmin.getUserByEmail(email);
+      return res.status(200).json({
+        message: "User email exist",
+        userExist: data?.uid ? true : false,
+      });
+    } catch (error) {
+      return res.json({
+        message: "User email does not exist",
+        userExist: false,
+      });
+    }
+  },
 
-    // TODO: Once the new version is released, remove this
-    async sendPhoneNumberOtpOld(req, res) {
-        try {
-            const { phoneNumber } = req.body;
-            // min 6 digits and max 6 digits
-            const otpCode = crypto.randomInt(10**5, 10**6-1);
-            // Step 1 - save the otp to firestore database
-            const phoneNumberDocID = phoneNumber.replace(/[^\w\s]/gi, '');
-            await db.collection(PHONE_OTPS).doc(phoneNumberDocID).set({
-                otp: otpCode
-            });
-            // Step 2 - send the otp sms message
-            await axios(kudiRequestOptions(phoneNumber, otpCode));
-            return res.status(200).json({message: '6 digit OTP sent.', otpCode });
-        } catch (error) {
-            return res.status(400).json({message: 'Phone number authentication failed.'});
-        }
-    },
+  async checkIfUsernameExist(req, res) {
+    try {
+      const { username } = req.body;
+      const data = await getUserDocumentByUsername(username);
+      return res
+        .status(200)
+        .json({ message: "Username exist", userExist: data });
+    } catch (error) {
+      return res.json({ message: "Username does not exist", userExist: false });
+    }
+  },
 
-    // This method is used to send OTP to user's phone
-    async sendPhoneNumberOtp(req, res) {
-        try {
-            const { phoneNumber, country } = req.body;
-            const nigerianNumber = isNigerianNumber(phoneNumber);
-            // min 6 digits and max 6 digits
-            const otpCode = crypto.randomInt(10**5, 10**6-1);
-            // Step 1 - save the otp to firestore database
-            const phoneNumberDocID = phoneNumber.replace(/[^\w\s]/gi, '');
-            await db.collection(PHONE_OTPS).doc(phoneNumberDocID).set({
-                otp: otpCode
-            });
-            // Step 2 - send the otp sms message
-            if (nigerianNumber || country === 'Nigeria') {
-                await axios(kudiRequestOptions(phoneNumber, otpCode));
-            } else {
-                await axios(sevenIORequestOptions(phoneNumber, otpCode));
-            }
-            return res.status(200).json({message: '6 digit OTP sent.', otpCode });
-        } catch (error) {
-            return res.status(400).json({message: 'Phone number authentication failed.'});
-        }
-    },
+  // TODO: Once the new version is released, remove this
+  async sendPhoneNumberOtpOld(req, res) {
+    try {
+      const { phoneNumber } = req.body;
+      // min 6 digits and max 6 digits
+      const otpCode = crypto.randomInt(10 ** 5, 10 ** 6 - 1);
+      // Step 1 - save the otp to firestore database
+      const phoneNumberDocID = phoneNumber.replace(/[^\w\s]/gi, "");
+      await db.collection(PHONE_OTPS).doc(phoneNumberDocID).set({
+        otp: otpCode,
+      });
+      // Step 2 - send the otp sms message
+      await axios(kudiRequestOptions(phoneNumber, otpCode));
+      return res.status(200).json({ message: "6 digit OTP sent.", otpCode });
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ message: "Phone number authentication failed." });
+    }
+  },
 
-    async verifyOTP(req, res) {
-        try {
-            const { phoneNumber, otpCode } = req.body;
-            const doc = await getPhoneOtpCode(phoneNumber);
-            if (!doc) {
-                return res.status(400).json({message: 'Incorrect OTP code'});
-            } else {
-                if (otpCode !== `${doc.otp}`) {
-                    return res.status(400).json({message: 'Incorrect OTP code'});
-                } else {
-                    let token = null;
-                    const authAdmin = auth.getAuth();
-                    const data = await authAdmin.getUserByPhoneNumber(phoneNumber);   
-                    const user = await getUserDocument(data?.uid ?? '');
-                    if (user) {
-                        token = await authAdmin.createCustomToken(data.uid);
-                    }
-                    return res.status(200).json({message: 'Phone number verified successfully.', newUser: user === null, user, token});
-                }
-            }
-        } catch (error) {
-            return res.status(400).json({message: 'User data does not exist', newUser: true, user: null, token: null });
-        }
-    },
+  // This method is used to send OTP to user's phone
+  async sendPhoneNumberOtp(req, res) {
+    try {
+      const { phoneNumber, country } = req.body;
+      const nigerianNumber = isNigerianNumber(phoneNumber);
+      // min 6 digits and max 6 digits
+      const otpCode = crypto.randomInt(10 ** 5, 10 ** 6 - 1);
+      // Step 1 - save the otp to firestore database
+      const phoneNumberDocID = phoneNumber.replace(/[^\w\s]/gi, "");
+      await db.collection(PHONE_OTPS).doc(phoneNumberDocID).set({
+        otp: otpCode,
+      });
+      // Step 2 - send the otp sms message
+      if (nigerianNumber || country === "Nigeria") {
+        await axios(kudiRequestOptions(phoneNumber, otpCode));
+      } else {
+        await axios(sevenIORequestOptions(phoneNumber, otpCode));
+      }
+      return res.status(200).json({ message: "6 digit OTP sent.", otpCode });
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ message: "Phone number authentication failed." });
+    }
+  },
 
-    async createUserWithNumber(req, res) {
-        try {
-            const { phoneNumber } = req.body;
-            const authAdmin = auth.getAuth();
-            const data = await authAdmin.createUser({
-                phoneNumber,
-                disabled: false,
-                metadata: {
-                    creationTime: new Date().toUTCString(),
-                    lastSignInTime: new Date().toUTCString(),
-                }
-            });
-            const token = await authAdmin.createCustomToken(data.uid);
-            return res.status(200).json({message: 'User created', token, userId: data.uid });
-        } catch (error) {
-            return res.status(400).json({message: 'User not created', token: null, userId: null });
+  async verifyOTP(req, res) {
+    try {
+      const { phoneNumber, otpCode } = req.body;
+      const doc = await getPhoneOtpCode(phoneNumber);
+      if (!doc) {
+        return res.status(400).json({ message: "Incorrect OTP code" });
+      } else {
+        if (otpCode !== `${doc.otp}`) {
+          return res.status(400).json({ message: "Incorrect OTP code" });
+        } else {
+          let token = null;
+          const authAdmin = auth.getAuth();
+          const data = await authAdmin.getUserByPhoneNumber(phoneNumber);
+          const user = await getUserDocument(data?.uid ?? "");
+          if (user) {
+            token = await authAdmin.createCustomToken(data.uid);
+          }
+          return res.status(200).json({
+            message: "Phone number verified successfully.",
+            newUser: user === null,
+            user,
+            token,
+          });
         }
-    },
-}
+      }
+    } catch (error) {
+      return res.status(400).json({
+        message: "User data does not exist",
+        newUser: true,
+        user: null,
+        token: null,
+      });
+    }
+  },
+
+  async createUserWithNumber(req, res) {
+    try {
+      const { phoneNumber } = req.body;
+      const authAdmin = auth.getAuth();
+      const data = await authAdmin.createUser({
+        phoneNumber,
+        disabled: false,
+        metadata: {
+          creationTime: new Date().toUTCString(),
+          lastSignInTime: new Date().toUTCString(),
+        },
+      });
+      const token = await authAdmin.createCustomToken(data.uid);
+      return res
+        .status(200)
+        .json({ message: "User created", token, userId: data.uid });
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ message: "User not created", token: null, userId: null });
+    }
+  },
+};
 
 async function getPhoneOtpCode(phoneNumber) {
-    try {
-        const phoneNumberDocID = phoneNumber.replace(/[^\w\s]/gi, '');
-        const phoneOtpCodeRef = db.collection(PHONE_OTPS).doc(phoneNumberDocID);
-        const doc = await phoneOtpCodeRef.get();
-        return doc.data();
-    } catch (error) {
-        return null;
-    }
+  try {
+    const phoneNumberDocID = phoneNumber.replace(/[^\w\s]/gi, "");
+    const phoneOtpCodeRef = db.collection(PHONE_OTPS).doc(phoneNumberDocID);
+    const doc = await phoneOtpCodeRef.get();
+    return doc.data();
+  } catch (error) {
+    return null;
+  }
 }
 
 async function getUserDocument(userUID) {
-    try {
-        const document = await admin.firestore().collection('users').doc(userUID).get();
-        if (!document.data().deleted) {
-            return document.data();
-        } else {
-            return null;
-        }
-    } catch (error) {
-        return null;
+  try {
+    const document = await admin
+      .firestore()
+      .collection("users")
+      .doc(userUID)
+      .get();
+    if (!document.data().deleted) {
+      return document.data();
+    } else {
+      return null;
     }
+  } catch (error) {
+    return null;
+  }
+}
+
+async function getUserDocumentByUsername(username) {
+  try {
+    const document = await admin
+      .firestore()
+      .collection("users")
+      .where("username", "==", username)
+      .limit(1)
+      .get();
+    return !document.empty;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 }
 
 function kudiRequestOptions(phoneNumber, otpCode) {
-    return {
-        method: 'POST',
-        url: 'https://my.kudisms.net/api/otp',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            "Access-Control-Allow-Origin": "*",
-        },
-        data: {
-            'token': process.env.KUDI_SMS_TOKEN,
-            'senderID': 'KickChat',
-            'recipients': phoneNumber,
-            'otp': otpCode,
-            'appnamecode': '1553456476',
-            'templatecode': '1248646928'
-        }
-    };
+  return {
+    method: "POST",
+    url: "https://my.kudisms.net/api/otp",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    data: {
+      token: process.env.KUDI_SMS_TOKEN,
+      senderID: "KickChat",
+      recipients: phoneNumber,
+      otp: otpCode,
+      appnamecode: "1553456476",
+      templatecode: "1248646928",
+    },
+  };
 }
 
 function sevenIORequestOptions(phoneNumber, otpCode) {
-    return {
-        method: 'POST',
-        url: 'https://gateway.seven.io/api/sms',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Api-Key': process.env.SEVEN_IO_KEY
-        },
-        data: {
-            'from': 'KickChat',
-            'to': phoneNumber,
-            "text": `${otpCode} is your verification code`
-        }
-    };
+  return {
+    method: "POST",
+    url: "https://gateway.seven.io/api/sms",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Api-Key": process.env.SEVEN_IO_KEY,
+    },
+    data: {
+      from: "KickChat",
+      to: phoneNumber,
+      text: `${otpCode} is your verification code`,
+    },
+  };
 }
 
 function isNigerianNumber(phoneNumber) {
-    // Remove any whitespace from the phone number
-    const cleanNumber = phoneNumber.replace(/\s+/g, '');
+  // Remove any whitespace from the phone number
+  const cleanNumber = phoneNumber.replace(/\s+/g, "");
 
-    // Check if the phone number starts with +234
-    return cleanNumber.startsWith('+234');
+  // Check if the phone number starts with +234
+  return cleanNumber.startsWith("+234");
 }
