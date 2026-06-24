@@ -109,6 +109,7 @@ const fileUpload = require("./routes/file-upload");
 const news = require("./routes/news");
 const ai = require("./routes/ai");
 const linkPreview = require("./routes/linkPreview");
+const contact = require("./routes/contact");
 
 app.use("/", index);
 app.use("/", accessToken);
@@ -122,6 +123,7 @@ app.use("/", fileUpload);
 app.use("/", ai);
 app.use("/news", news);
 app.use("/", linkPreview);
+app.use("/", contact);
 
 app.use((error, req, res, next) => {
   console.error("Error: ", error);
