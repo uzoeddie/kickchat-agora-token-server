@@ -47,7 +47,13 @@ module.exports = {
         userExist: data?.uid ? true : false,
       });
     } catch (error) {
-      return res.json({
+      if (error.code === "auth/user-not-found") {
+        return res.status(200).json({
+          message: "User email exist",
+          userExist: false,
+        });
+      }
+      return res.status(500).json({
         message: "User email does not exist",
         userExist: false,
       });
@@ -62,6 +68,7 @@ module.exports = {
         .status(200)
         .json({ message: "Username exist", userExist: data });
     } catch (error) {
+      console.log(error);
       return res.json({ message: "Username does not exist", userExist: false });
     }
   },
@@ -210,7 +217,6 @@ async function getUserDocumentByUsername(username) {
       .get();
     return !document.empty;
   } catch (error) {
-    console.log(error);
     return null;
   }
 }

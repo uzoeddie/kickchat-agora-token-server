@@ -1,6 +1,7 @@
 node_modules/
 .env*
 api.http
+auth.http
 kickchatdev-service-account.json
 kickchat-service-account.json
 .vercel
