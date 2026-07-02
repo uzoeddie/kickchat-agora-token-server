@@ -103,22 +103,31 @@ module.exports = {
         });
       }
 
-      if (records.length > 0 && records[0].exchange !== "") {
-        const result = await checkSMTPConnection(records[0].exchange, 2000);
-        if (!result) {
-          return res.status(200).json({
-            valid: false,
-            message: "Email domain does not have valid mail servers",
-            validators: {
-              regex: { valid: false },
-              typo: { valid: false },
-              disposable: { valid: false },
-              mx: { valid: false },
-              smtp: { valid: false },
-            },
-          });
-        }
-      }
+      /**
+       * There is an issue with the SMTP connection check. It can be slow and unreliable,
+       * especially for domains that have strict anti-spam measures.
+       * Port 25 outbound is blocked on Vercel (and most serverless/PaaS
+      // platforms), so this check always timed out and returned false in
+      // production even for valid domains.
+       * For now, we will skip this check to ensure faster response times.
+       * If you want to enable it, uncomment the code below.
+       */
+      // if (records.length > 0 && records[0].exchange !== "") {
+      //   const result = await checkSMTPConnection(records[0].exchange, 2000);
+      //   if (!result) {
+      //     return res.status(200).json({
+      //       valid: false,
+      //       message: "Email domain does not have valid mail servers",
+      //       validators: {
+      //         regex: { valid: false },
+      //         typo: { valid: false },
+      //         disposable: { valid: false },
+      //         mx: { valid: false },
+      //         smtp: { valid: false },
+      //       },
+      //     });
+      //   }
+      // }
 
       // Check if domain is disposable (SUPER FAST - O(1) lookup!)
       const isDisposable = disposableDomains.has(domain);
