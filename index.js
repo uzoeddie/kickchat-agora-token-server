@@ -110,6 +110,7 @@ const news = require("./routes/news");
 const ai = require("./routes/ai");
 const linkPreview = require("./routes/linkPreview");
 const contact = require("./routes/contact");
+const tiktok = require("./routes/tiktok");
 
 app.use("/", index);
 app.use("/", accessToken);
@@ -124,6 +125,7 @@ app.use("/", ai);
 app.use("/news", news);
 app.use("/", linkPreview);
 app.use("/", contact);
+app.use("/", tiktok);
 
 app.use((error, req, res, next) => {
   console.error("Error: ", error);
