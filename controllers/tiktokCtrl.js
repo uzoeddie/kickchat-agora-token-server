@@ -4,8 +4,8 @@ const auth = require("firebase-admin/auth");
 
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-const TIKTOK_REDIRECT_URI =
-  "https://kickchat-server-production.vercel.app/auth/tiktok/callback";
+// const TIKTOK_REDIRECT_URI =
+//   "https://kickchat-server-production.vercel.app/auth/tiktok/callback";
 
 module.exports = {
   async checkIfTikTokUserExists(req, res) {
@@ -162,11 +162,11 @@ module.exports = {
 
   async tikTokAuthentication(req, res) {
     try {
-      const { code, code_verifier } = req.body;
+      const { code, code_verifier, redirect_uri } = req.body;
 
-      if (!code || !code_verifier) {
+      if (!code || !code_verifier || !redirect_uri) {
         return res.status(400).json({
-          error: "code and code_verifier are required",
+          error: "redirect_uri, code and code_verifier are required",
         });
       }
 
@@ -189,7 +189,7 @@ module.exports = {
             client_secret: CLIENT_SECRET,
             code,
             grant_type: "authorization_code",
-            redirect_uri: TIKTOK_REDIRECT_URI,
+            redirect_uri,
             code_verifier,
           }),
         },
