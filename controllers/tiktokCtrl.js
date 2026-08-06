@@ -1,54 +1,160 @@
 const fetch = require("node-fetch");
+const admin = require("firebase-admin");
+const auth = require("firebase-admin/auth");
 
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-
-const TIKTOK_REDIRECT_URI = "https://kickchatapp.com/auth/tiktok/callback";
+const TIKTOK_REDIRECT_URI =
+  "https://kickchat-server-production.vercel.app/auth/tiktok/callback";
 
 module.exports = {
-  /**
-   * Universal Link fallback.
-   *
-   * Normally iOS intercepts this URL and opens KickChat.
-   * This HTML is displayed only when the app cannot be opened.
-   */
+  async checkIfTikTokUserExists(req, res) {
+    try {
+      let token = null;
+      const { tiktok_open_id } = req.body;
+      const user = await getUserDocumentByTikTokId(tiktok_open_id);
+      if (user) {
+        const authAdmin = auth.getAuth();
+        token = await authAdmin.createCustomToken(user.id);
+      }
+      return res
+        .status(200)
+        .json({ message: "User exist", newUser: user === null, user, token });
+    } catch (error) {
+      return res.json({
+        message: "User does not exist",
+        newUser: true,
+        user: null,
+        token: null,
+      });
+    }
+  },
+
   tikTokRedirect(req, res) {
+    const {
+      code,
+      state,
+      error,
+      error_description: errorDescription,
+    } = req.query;
+
+    const callbackParams = new URLSearchParams();
+
+    if (code) {
+      callbackParams.set("code", code);
+    }
+
+    if (state) {
+      callbackParams.set("state", state);
+    }
+
+    if (error) {
+      callbackParams.set("error", error);
+    }
+
+    if (errorDescription) {
+      callbackParams.set("error_description", errorDescription);
+    }
+
+    const appCallbackUrl = `kickchat://auth/tiktok/callback?${callbackParams.toString()}`;
+
+    const safeCallbackUrl = appCallbackUrl
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+
     return res.status(200).send(`
     <!doctype html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
+
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1"
         />
-        <title>Open KickChat</title>
+
+        <title>Return to KickChat</title>
 
         <style>
-          body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 40px 20px;
+          * {
+            box-sizing: border-box;
           }
 
-          a {
-            display: inline-block;
-            padding: 14px 24px;
+          body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #f1f2f6;
+            color: #242a37;
+            font-family: Arial, sans-serif;
+          }
+
+          .card {
+            width: 100%;
+            max-width: 420px;
+            padding: 32px 24px;
+            background: #ffffff;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+          }
+
+          p {
+            color: #616775;
+            line-height: 1.5;
+          }
+
+          .button {
+            display: block;
+            margin-top: 24px;
+            padding: 15px 20px;
+            border-radius: 10px;
             background: #2196f3;
-            color: white;
+            color: #ffffff;
             text-decoration: none;
-            border-radius: 8px;
+            font-weight: 700;
           }
         </style>
       </head>
 
       <body>
-        <h1>Continue in KickChat</h1>
-        <p>Tap the button below to return to the app.</p>
+        <main class="card">
+          <h1>Return to KickChat</h1>
 
-        <a href="${TIKTOK_REDIRECT_URI}">
-          Open KickChat
-        </a>
+          ${
+            error
+              ? `
+                <p>
+                  TikTok login could not be completed.
+                  Return to KickChat to try again.
+                </p>
+              `
+              : `
+                <p>
+                  TikTok login was successful.
+                  Continue in the KickChat app.
+                </p>
+              `
+          }
+
+          <a class="button" href="${safeCallbackUrl}">
+            Open KickChat
+          </a>
+        </main>
+
+        <script>
+          const appCallbackUrl = ${JSON.stringify(appCallbackUrl)};
+
+          // Attempt to open KickChat automatically.
+          window.setTimeout(() => {
+            window.location.href = appCallbackUrl;
+          }, 300);
+        </script>
       </body>
     </html>
   `);
@@ -65,8 +171,6 @@ module.exports = {
       }
 
       if (!CLIENT_KEY || !CLIENT_SECRET) {
-        console.error("TikTok credentials are not configured");
-
         return res.status(500).json({
           error: "TikTok authentication is not configured",
         });
@@ -83,7 +187,7 @@ module.exports = {
           body: new URLSearchParams({
             client_key: CLIENT_KEY,
             client_secret: CLIENT_SECRET,
-            code: decodeURIComponent(code),
+            code,
             grant_type: "authorization_code",
             redirect_uri: TIKTOK_REDIRECT_URI,
             code_verifier,
@@ -94,30 +198,18 @@ module.exports = {
       const tokenData = await tokenResponse.json();
 
       if (!tokenResponse.ok || tokenData.error) {
-        console.error("TikTok token exchange failed:", tokenData);
-
         return res.status(401).json({
           error: "TikTok token exchange failed",
           detail: tokenData,
         });
       }
 
-      const {
-        access_token,
-        refresh_token,
-        open_id,
-        expires_in,
-        refresh_expires_in,
-        scope,
-      } = tokenData;
-
       const profileResponse = await fetch(
         "https://open.tiktokapis.com/v2/user/info/" +
           "?fields=open_id,display_name,avatar_url",
         {
-          method: "GET",
           headers: {
-            Authorization: `Bearer ${access_token}`,
+            Authorization: `Bearer ${tokenData.access_token}`,
           },
         },
       );
@@ -125,8 +217,6 @@ module.exports = {
       const profileData = await profileResponse.json();
 
       if (!profileResponse.ok || profileData.error?.code !== "ok") {
-        console.error("TikTok profile request failed:", profileData);
-
         return res.status(401).json({
           error: "Unable to retrieve TikTok profile",
           detail: profileData,
@@ -141,35 +231,67 @@ module.exports = {
         });
       }
 
-      /*
-       * Next:
-       * 1. Search your database for profile.open_id.
-       * 2. Create a KickChat user if one does not exist.
-       * 3. Generate your Firebase custom token or your own JWT.
-       * 4. Store refresh_token securely if you need future TikTok access.
-       */
-
       return res.status(200).json({
         user: {
           tiktok_open_id: profile.open_id,
           display_name: profile.display_name ?? null,
           avatar_url: profile.avatar_url ?? null,
         },
-
-        // Temporary during development.
-        // Do not normally expose TikTok refresh tokens to the mobile app.
         tiktok: {
-          scope,
-          expires_in,
-          refresh_expires_in,
+          scope: tokenData.scope,
+          expires_in: tokenData.expires_in,
+          refresh_expires_in: tokenData.refresh_expires_in,
         },
       });
     } catch (error) {
-      console.error("TikTok authentication error:", error);
-
       return res.status(500).json({
-        error: "Internal server error",
+        user: null,
+      });
+    }
+  },
+
+  async createUserWithTikTok(req, res) {
+    try {
+      const { tiktokId } = req.body;
+      const authAdmin = auth.getAuth();
+      const data = await authAdmin.createUser({
+        tiktokId,
+        disabled: false,
+        metadata: {
+          creationTime: new Date().toUTCString(),
+          lastSignInTime: new Date().toUTCString(),
+        },
+      });
+      const token = await authAdmin.createCustomToken(data.uid);
+      return res
+        .status(200)
+        .json({ message: "TikTok User created", token, userId: data.uid });
+    } catch (error) {
+      return res.status(400).json({
+        message: "TikTok User not created",
+        token: null,
+        userId: null,
       });
     }
   },
 };
+
+async function getUserDocumentByTikTokId(tiktokId) {
+  try {
+    const snapshot = await admin
+      .firestore()
+      .collection("users")
+      .where("tiktokId", "==", tiktokId)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    return null;
+  }
+}

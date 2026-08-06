@@ -68,7 +68,6 @@ module.exports = {
         .status(200)
         .json({ message: "Username exist", userExist: data });
     } catch (error) {
-      console.log(error);
       return res.json({ message: "Username does not exist", userExist: false });
     }
   },
