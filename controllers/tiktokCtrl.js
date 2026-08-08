@@ -4,8 +4,6 @@ const auth = require("firebase-admin/auth");
 
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-// const TIKTOK_REDIRECT_URI =
-//   "https://kickchat-server-production.vercel.app/auth/tiktok/callback";
 
 module.exports = {
   async checkIfTikTokUserExists(req, res) {
@@ -160,6 +158,32 @@ module.exports = {
   `);
   },
 
+  async tikTokWebAuthorization(req, res) {
+    try {
+      let url = "https://www.tiktok.com/v2/auth/authorize/";
+      const { client_key, redirect_uri } = req.query;
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      const state = generateState();
+      res.cookie("csrfState", state, { maxAge: 60000 });
+
+      url += `?client_key=${client_key}`;
+      url += "&scope=user.info.basic";
+      url += "&response_type=code";
+      url += `&redirect_uri=${redirect_uri}`;
+      url += `&code_challenge=${codeChallenge}`;
+      url += "&code_challenge_method=S256";
+      url += "&state=" + state;
+
+      return res.status(200).json({ message: "Authorization successful", url });
+    } catch (error) {
+      return res.status(500).json({
+        message: "Authorization failed",
+        url: null,
+      });
+    }
+  },
+
   async tikTokAuthentication(req, res) {
     try {
       const { code, code_verifier, redirect_uri } = req.body;
@@ -294,4 +318,33 @@ async function getUserDocumentByTikTokId(tiktokId) {
   } catch (error) {
     return null;
   }
+}
+
+function generateCodeVerifier(length = 64) {
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const randomValues = new Uint8Array(length);
+  crypto.getRandomValues(randomValues);
+  return Array.from(
+    randomValues,
+    (byte) => charset[byte % charset.length],
+  ).join("");
+}
+
+function generateState() {
+  return generateCodeVerifier(24);
+}
+
+/**
+ * Derives the PKCE code_challenge from the code_verifier using S256.
+ */
+async function generateCodeChallenge(codeVerifier) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(codeVerifier);
+  const digestBuffer = await crypto.subtle.digest("SHA-256", data);
+  const digestBytes = new Uint8Array(digestBuffer);
+
+  // Base64-URL encode without padding
+  const base64 = btoa(String.fromCharCode(...digestBytes));
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
