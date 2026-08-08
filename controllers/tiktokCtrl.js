@@ -4,10 +4,8 @@ const auth = require("firebase-admin/auth");
 
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-const WEB_APP_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://kickchatapp.com"
-    : "http://localhost:4200";
+const WEB_APP_URL = process.env.WEB_APP_URL;
+
 const REDIRECT_URI = `https://kickchat-server-production.vercel.app/auth/tiktok/web/callback`;
 
 module.exports = {
