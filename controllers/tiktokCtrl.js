@@ -165,7 +165,7 @@ module.exports = {
     try {
       const { page } = req.query;
       const state = generateRandomState(24);
-      const authPage = page === "register" ? "register" : "login";
+      const authPage = page;
 
       res.cookie("tiktok_oauth_state", state, {
         httpOnly: true,
@@ -183,7 +183,7 @@ module.exports = {
 
       const params = new URLSearchParams({
         client_key: CLIENT_KEY,
-        scope: "user.info.basic",
+        scope: "user.info.basic,user.info.profile",
         response_type: "code",
         redirect_uri: REDIRECT_URI,
         state,
@@ -209,24 +209,26 @@ module.exports = {
       } = req.query;
 
       const storedState = req.cookies?.tiktok_oauth_state;
-      const authPage =
-        req.cookies?.tiktok_auth_page === "register" ? "register" : "login";
+      const authPage = req.cookies?.tiktok_auth_page;
+
+      const path =
+        authPage === "settings/account"
+          ? "settings/account"
+          : `auth/${authPage}`;
 
       if (error) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=${encodeURIComponent(error)}`,
+          `${WEB_APP_URL}/${path}?tiktok_error=${encodeURIComponent(error)}`,
         );
       }
 
       if (!code) {
-        return res.redirect(
-          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=missing_code`,
-        );
+        return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=missing_code`);
       }
 
       if (!state || !storedState || state !== storedState) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=invalid_state`,
+          `${WEB_APP_URL}/${path}?tiktok_error=invalid_state`,
         );
       }
 
@@ -256,7 +258,7 @@ module.exports = {
 
       if (!tokenResponse.ok || tokenData.error) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=token_exchange`,
+          `${WEB_APP_URL}/${path}?tiktok_error=token_exchange`,
         );
       }
 
@@ -274,16 +276,14 @@ module.exports = {
       const profileData = await profileResponse.json();
 
       if (!profileResponse.ok || profileData.error?.code !== "ok") {
-        return res.redirect(
-          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=profile`,
-        );
+        return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=profile`);
       }
 
       const profile = profileData.data?.user;
 
       if (!profile?.open_id) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=invalid_profile`,
+          `${WEB_APP_URL}/${path}?tiktok_error=invalid_profile`,
         );
       }
 
@@ -292,14 +292,12 @@ module.exports = {
       callbackParams.set("display_name", profile.display_name ?? null);
       callbackParams.set("avatar_url", profile.avatar_url ?? null);
       return res.redirect(
-        `${WEB_APP_URL}/auth/${authPage}?exchange=${encodeURIComponent(
+        `${WEB_APP_URL}/${path}?exchange=${encodeURIComponent(
           callbackParams.toString(),
         )}`,
       );
     } catch (error) {
-      return res.redirect(
-        `${WEB_APP_URL}/auth/${authPage}?tiktok_error=unknown`,
-      );
+      return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=unknown`);
     }
   },
 
@@ -405,9 +403,7 @@ module.exports = {
           lastSignInTime: new Date().toUTCString(),
         },
       });
-      const token = await authAdmin.createCustomToken(data.uid, {
-        provider: "tiktok",
-      });
+      const token = await authAdmin.createCustomToken(data.uid);
       return res
         .status(200)
         .json({ message: "TikTok User created", token, userId: data.uid });
