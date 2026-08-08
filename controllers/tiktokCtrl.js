@@ -4,7 +4,7 @@ const auth = require("firebase-admin/auth");
 
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-const WEB_APP_URL = process.env.WEB_APP_URL;
+const WEB_APP_URL = process.env.WEB_APP_URL ?? "http://localhost:4200";
 
 const REDIRECT_URI = `https://kickchat-server-production.vercel.app/auth/tiktok/web/callback`;
 
@@ -204,11 +204,6 @@ module.exports = {
       const storedState = req.cookies?.tiktok_oauth_state;
 
       if (error) {
-        console.error("TikTok OAuth error:", {
-          error,
-          errorDescription,
-        });
-
         return res.redirect(
           `${WEB_APP_URL}/auth/login?tiktok_error=${encodeURIComponent(error)}`,
         );
@@ -252,8 +247,6 @@ module.exports = {
       const tokenData = await tokenResponse.json();
 
       if (!tokenResponse.ok || tokenData.error) {
-        console.error("TikTok token error:", tokenData);
-
         return res.redirect(
           `${process.env.WEB_APP_URL}/auth/login?tiktok_error=token_exchange`,
         );
@@ -273,8 +266,6 @@ module.exports = {
       const profileData = await profileResponse.json();
 
       if (!profileResponse.ok || profileData.error?.code !== "ok") {
-        console.error("TikTok profile error:", profileData);
-
         return res.redirect(`${WEB_APP_URL}/auth/login?tiktok_error=profile`);
       }
 
@@ -286,28 +277,16 @@ module.exports = {
         );
       }
 
-      // return res.status(200).json({
-      //   user: {
-      //     tiktok_open_id: profile.open_id,
-      //     display_name: profile.display_name ?? null,
-      //     avatar_url: profile.avatar_url ?? null,
-      //   },
-      //   tiktok: {
-      //     scope: tokenData.scope,
-      //     expires_in: tokenData.expires_in,
-      //     refresh_expires_in: tokenData.refresh_expires_in,
-      //   },
-      // });
       const callbackParams = new URLSearchParams();
       callbackParams.set("tiktok_open_id", profile.open_id);
       callbackParams.set("display_name", profile.display_name ?? null);
       callbackParams.set("avatar_url", profile.avatar_url ?? null);
       return res.redirect(
-        `${WEB_APP_URL}/auth/tiktok/callback?exchange=${encodeURIComponent(callbackParams)}`,
+        `${WEB_APP_URL}/auth/login?exchange=${encodeURIComponent(
+          callbackParams.toString(),
+        )}`,
       );
     } catch (error) {
-      console.error("TikTok callback error:", error);
-
       return res.redirect(`${WEB_APP_URL}/auth/login?tiktok_error=unknown`);
     }
   },
