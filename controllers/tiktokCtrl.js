@@ -163,9 +163,18 @@ module.exports = {
 
   async tikTokWebAuthorization(req, res) {
     try {
-      const state = generateState();
+      const { page } = req.query;
+      const state = generateRandomState(24);
+      const authPage = page === "register" ? "register" : "login";
 
       res.cookie("tiktok_oauth_state", state, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 10 * 60 * 1000,
+      });
+
+      res.cookie("tiktok_auth_page", authPage, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -182,13 +191,11 @@ module.exports = {
 
       const url = `https://www.tiktok.com/v2/auth/authorize/?${params.toString()}`;
 
-      // return res.status(200).json({ message: "Authorization successful", url });
       return res.redirect(url);
     } catch (error) {
-      return res.status(500).json({
-        message: "Authorization failed",
-        url: null,
-      });
+      return res.redirect(
+        `${WEB_APP_URL}/auth/${authPage}?tiktok_error=unknown`,
+      );
     }
   },
 
@@ -202,28 +209,29 @@ module.exports = {
       } = req.query;
 
       const storedState = req.cookies?.tiktok_oauth_state;
+      const authPage =
+        req.cookies?.tiktok_auth_page === "register" ? "register" : "login";
 
       if (error) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/login?tiktok_error=${encodeURIComponent(error)}`,
+          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=${encodeURIComponent(error)}`,
         );
       }
 
       if (!code) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/login?tiktok_error=missing_code`,
+          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=missing_code`,
         );
       }
 
       if (!state || !storedState || state !== storedState) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/login?tiktok_error=invalid_state`,
+          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=invalid_state`,
         );
       }
 
       res.clearCookie("tiktok_oauth_state");
-
-      // const redirectUri = `${BACKEND_URL}/auth/tiktok/web/callback`;
+      res.clearCookie("tiktok_auth_page");
 
       // Exchange authorization code
       const tokenResponse = await fetch(
@@ -248,7 +256,7 @@ module.exports = {
 
       if (!tokenResponse.ok || tokenData.error) {
         return res.redirect(
-          `${process.env.WEB_APP_URL}/auth/login?tiktok_error=token_exchange`,
+          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=token_exchange`,
         );
       }
 
@@ -266,14 +274,16 @@ module.exports = {
       const profileData = await profileResponse.json();
 
       if (!profileResponse.ok || profileData.error?.code !== "ok") {
-        return res.redirect(`${WEB_APP_URL}/auth/login?tiktok_error=profile`);
+        return res.redirect(
+          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=profile`,
+        );
       }
 
       const profile = profileData.data?.user;
 
       if (!profile?.open_id) {
         return res.redirect(
-          `${WEB_APP_URL}/auth/login?tiktok_error=invalid_profile`,
+          `${WEB_APP_URL}/auth/${authPage}?tiktok_error=invalid_profile`,
         );
       }
 
@@ -282,12 +292,14 @@ module.exports = {
       callbackParams.set("display_name", profile.display_name ?? null);
       callbackParams.set("avatar_url", profile.avatar_url ?? null);
       return res.redirect(
-        `${WEB_APP_URL}/auth/login?exchange=${encodeURIComponent(
+        `${WEB_APP_URL}/auth/${authPage}?exchange=${encodeURIComponent(
           callbackParams.toString(),
         )}`,
       );
     } catch (error) {
-      return res.redirect(`${WEB_APP_URL}/auth/login?tiktok_error=unknown`);
+      return res.redirect(
+        `${WEB_APP_URL}/auth/${authPage}?tiktok_error=unknown`,
+      );
     }
   },
 
@@ -429,7 +441,7 @@ async function getUserDocumentByTikTokId(tiktokId) {
   }
 }
 
-function generateCodeVerifier(length = 64) {
+function generateRandomState(length = 64) {
   const charset =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
   const randomValues = new Uint8Array(length);
@@ -438,8 +450,4 @@ function generateCodeVerifier(length = 64) {
     randomValues,
     (byte) => charset[byte % charset.length],
   ).join("");
-}
-
-function generateState() {
-  return generateCodeVerifier(24);
 }
