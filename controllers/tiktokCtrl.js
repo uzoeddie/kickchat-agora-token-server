@@ -4,6 +4,11 @@ const auth = require("firebase-admin/auth");
 
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
+const WEB_APP_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://kickchatapp.com"
+    : "http://localhost:4200";
+const REDIRECT_URI = `https://kickchat-server-production.vercel.app/auth/tiktok/web/callback`;
 
 module.exports = {
   async checkIfTikTokUserExists(req, res) {
@@ -160,27 +165,145 @@ module.exports = {
 
   async tikTokWebAuthorization(req, res) {
     try {
-      let url = "https://www.tiktok.com/v2/auth/authorize/";
-      const { client_key, redirect_uri } = req.query;
-      const codeVerifier = generateCodeVerifier();
-      const codeChallenge = await generateCodeChallenge(codeVerifier);
       const state = generateState();
-      res.cookie("csrfState", state, { maxAge: 60000 });
 
-      url += `?client_key=${client_key}`;
-      url += "&scope=user.info.basic";
-      url += "&response_type=code";
-      url += `&redirect_uri=${redirect_uri}`;
-      url += `&code_challenge=${codeChallenge}`;
-      url += "&code_challenge_method=S256";
-      url += "&state=" + state;
+      res.cookie("tiktok_oauth_state", state, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 10 * 60 * 1000,
+      });
 
-      return res.status(200).json({ message: "Authorization successful", url });
+      const params = new URLSearchParams({
+        client_key: CLIENT_KEY,
+        scope: "user.info.basic",
+        response_type: "code",
+        redirect_uri: REDIRECT_URI,
+        state,
+      });
+
+      const url = `https://www.tiktok.com/v2/auth/authorize/?${params.toString()}`;
+
+      // return res.status(200).json({ message: "Authorization successful", url });
+      return res.redirect(url);
     } catch (error) {
       return res.status(500).json({
         message: "Authorization failed",
         url: null,
       });
+    }
+  },
+
+  async tikTokWebCallback(req, res) {
+    try {
+      const {
+        code,
+        state,
+        error,
+        error_description: errorDescription,
+      } = req.query;
+
+      const storedState = req.cookies?.tiktok_oauth_state;
+
+      if (error) {
+        console.error("TikTok OAuth error:", {
+          error,
+          errorDescription,
+        });
+
+        return res.redirect(
+          `${WEB_APP_URL}/auth/login?tiktok_error=${encodeURIComponent(error)}`,
+        );
+      }
+
+      if (!code) {
+        return res.redirect(
+          `${WEB_APP_URL}/auth/login?tiktok_error=missing_code`,
+        );
+      }
+
+      if (!state || !storedState || state !== storedState) {
+        return res.redirect(
+          `${WEB_APP_URL}/auth/login?tiktok_error=invalid_state`,
+        );
+      }
+
+      res.clearCookie("tiktok_oauth_state");
+
+      // const redirectUri = `${BACKEND_URL}/auth/tiktok/web/callback`;
+
+      // Exchange authorization code
+      const tokenResponse = await fetch(
+        "https://open.tiktokapis.com/v2/oauth/token/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Cache-Control": "no-cache",
+          },
+          body: new URLSearchParams({
+            client_key: CLIENT_KEY,
+            client_secret: CLIENT_SECRET,
+            code,
+            grant_type: "authorization_code",
+            redirect_uri: REDIRECT_URI,
+          }),
+        },
+      );
+
+      const tokenData = await tokenResponse.json();
+
+      if (!tokenResponse.ok || tokenData.error) {
+        console.error("TikTok token error:", tokenData);
+
+        return res.redirect(
+          `${process.env.WEB_APP_URL}/auth/login?tiktok_error=token_exchange`,
+        );
+      }
+
+      // Retrieve TikTok profile
+      const profileResponse = await fetch(
+        "https://open.tiktokapis.com/v2/user/info/" +
+          "?fields=open_id,display_name,avatar_url",
+        {
+          headers: {
+            Authorization: `Bearer ${tokenData.access_token}`,
+          },
+        },
+      );
+
+      const profileData = await profileResponse.json();
+
+      if (!profileResponse.ok || profileData.error?.code !== "ok") {
+        console.error("TikTok profile error:", profileData);
+
+        return res.redirect(`${WEB_APP_URL}/auth/login?tiktok_error=profile`);
+      }
+
+      const profile = profileData.data?.user;
+
+      if (!profile?.open_id) {
+        return res.redirect(
+          `${WEB_APP_URL}/auth/login?tiktok_error=invalid_profile`,
+        );
+      }
+
+      return res.status(200).json({
+        user: {
+          tiktok_open_id: profile.open_id,
+          display_name: profile.display_name ?? null,
+          avatar_url: profile.avatar_url ?? null,
+        },
+        tiktok: {
+          scope: tokenData.scope,
+          expires_in: tokenData.expires_in,
+          refresh_expires_in: tokenData.refresh_expires_in,
+        },
+      });
+    } catch (error) {
+      console.error("TikTok callback error:", error);
+
+      return res.redirect(`${WEB_APP_URL}/auth/login?tiktok_error=unknown`);
     }
   },
 
@@ -333,18 +456,4 @@ function generateCodeVerifier(length = 64) {
 
 function generateState() {
   return generateCodeVerifier(24);
-}
-
-/**
- * Derives the PKCE code_challenge from the code_verifier using S256.
- */
-async function generateCodeChallenge(codeVerifier) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(codeVerifier);
-  const digestBuffer = await crypto.subtle.digest("SHA-256", data);
-  const digestBytes = new Uint8Array(digestBuffer);
-
-  // Base64-URL encode without padding
-  const base64 = btoa(String.fromCharCode(...digestBytes));
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }

@@ -9,6 +9,7 @@ const favicon = require("serve-favicon");
 const path = require("path");
 const i18n = require("i18n");
 const http = require("http");
+const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary");
 const rateLimit = require("express-rate-limit");
 const { indexNonce } = require("./nounce");
@@ -89,6 +90,7 @@ app.use(
 );
 app.use(express.json({ limit: "150mb" }));
 app.use(express.urlencoded({ limit: "150mb", extended: true }));
+app.use(cookieParser());
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 2 * 60 * 1000, // 2 minutes
