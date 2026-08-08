@@ -288,18 +288,25 @@ module.exports = {
         );
       }
 
-      return res.status(200).json({
-        user: {
-          tiktok_open_id: profile.open_id,
-          display_name: profile.display_name ?? null,
-          avatar_url: profile.avatar_url ?? null,
-        },
-        tiktok: {
-          scope: tokenData.scope,
-          expires_in: tokenData.expires_in,
-          refresh_expires_in: tokenData.refresh_expires_in,
-        },
-      });
+      // return res.status(200).json({
+      //   user: {
+      //     tiktok_open_id: profile.open_id,
+      //     display_name: profile.display_name ?? null,
+      //     avatar_url: profile.avatar_url ?? null,
+      //   },
+      //   tiktok: {
+      //     scope: tokenData.scope,
+      //     expires_in: tokenData.expires_in,
+      //     refresh_expires_in: tokenData.refresh_expires_in,
+      //   },
+      // });
+      const callbackParams = new URLSearchParams();
+      callbackParams.set("tiktok_open_id", profile.open_id);
+      callbackParams.set("display_name", profile.display_name ?? null);
+      callbackParams.set("avatar_url", profile.avatar_url ?? null);
+      return res.redirect(
+        `${WEB_APP_URL}/auth/tiktok/callback?exchange=${encodeURIComponent(callbackParams)}`,
+      );
     } catch (error) {
       console.error("TikTok callback error:", error);
 
@@ -409,7 +416,9 @@ module.exports = {
           lastSignInTime: new Date().toUTCString(),
         },
       });
-      const token = await authAdmin.createCustomToken(data.uid);
+      const token = await authAdmin.createCustomToken(data.uid, {
+        provider: "tiktok",
+      });
       return res
         .status(200)
         .json({ message: "TikTok User created", token, userId: data.uid });
