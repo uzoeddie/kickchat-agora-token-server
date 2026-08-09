@@ -32,6 +32,12 @@ router.get("/.well-known/assetlinks.json", (req, res) => {
   assetsLinks[0].target.sha256_cert_fingerprints = JSON.parse(
     process.env.SHA256,
   );
+  /**
+   * This is local flutter run sha256
+   */
+  assetsLinks[0].target.sha256_cert_fingerprints.push(
+    "BA:18:A5:07:9B:AA:7C:4F:E0:29:3F:EB:5E:03:7D:4D:53:99:8B:37:D3:01:2B:B2:8B:38:CC:91:2E:BA:2D:32",
+  );
   res.send(assetsLinks);
 });
 
