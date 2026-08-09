@@ -34,9 +34,10 @@ module.exports = {
   tikTokRedirect(req, res) {
     const { state } = req.query;
 
-    const platform = typeof state === "string" && state.startsWith("mobile.")
-    ? "mobile"
-    : "web";
+    const platform =
+      typeof state === "string" && state.startsWith("mobile.")
+        ? "mobile"
+        : "web";
 
     if (platform === "mobile") {
       return mobileRedirection(req, res);
@@ -200,7 +201,7 @@ module.exports = {
   },
 };
 
-function webRedirection(req, res) {
+async function webRedirection(req, res) {
   try {
     const {
       code,
@@ -213,9 +214,7 @@ function webRedirection(req, res) {
     const authPage = req.cookies?.tiktok_auth_page;
 
     const path =
-      authPage === "settings/account"
-        ? "settings/account"
-        : `auth/${authPage}`;
+      authPage === "settings/account" ? "settings/account" : `auth/${authPage}`;
 
     if (error) {
       return res.redirect(
@@ -228,9 +227,7 @@ function webRedirection(req, res) {
     }
 
     if (!state || !storedState || state !== storedState) {
-      return res.redirect(
-        `${WEB_APP_URL}/${path}?tiktok_error=invalid_state`,
-      );
+      return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=invalid_state`);
     }
 
     res.clearCookie("tiktok_oauth_state");
@@ -258,9 +255,7 @@ function webRedirection(req, res) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenResponse.ok || tokenData.error) {
-      return res.redirect(
-        `${WEB_APP_URL}/${path}?tiktok_error=token_exchange`,
-      );
+      return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=token_exchange`);
     }
 
     // Retrieve TikTok profile
@@ -300,7 +295,7 @@ function webRedirection(req, res) {
   } catch (error) {
     return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=unknown`);
   }
-};
+}
 
 function mobileRedirection(req, res) {
   const { code, state, error, error_description: errorDescription } = req.query;
