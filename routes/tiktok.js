@@ -4,7 +4,7 @@ const router = express.Router();
 const tiktokCtrl = require("../controllers/tiktokCtrl");
 
 // Mobile
-router.get("/auth/tiktok/callback", tiktokCtrl.tikTokRedirect);
+// router.get("/auth/tiktok/callback", tiktokCtrl.tikTokRedirect);
 // Web
 router.get("/auth/tiktok/web", tiktokCtrl.tikTokWebAuthorization);
 router.get("/auth/tiktok/web/callback", tiktokCtrl.tikTokWebCallback);
