@@ -39,6 +39,11 @@ module.exports = {
       error_description: errorDescription,
     } = req.query;
 
+    console.log("code", code);
+    console.log("state", state);
+    console.log("error", error);
+    console.log("error_description", error_description);
+
     const callbackParams = new URLSearchParams();
 
     if (code) {
@@ -130,10 +135,7 @@ module.exports = {
           ${
             error
               ? `
-                <p>
-                  TikTok login could not be completed.
-                  Return to KickChat to try again.
-                </p>
+                <p>Error: ${error}<br>${errorDescription}</p>
               `
               : `
                 <p>
