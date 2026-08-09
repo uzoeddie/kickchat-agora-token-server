@@ -205,12 +205,13 @@ async function webRedirection(req, res) {
   try {
     const {
       code,
-      state,
+      state: rawState,
       error,
       error_description: errorDescription,
     } = req.query;
 
-    const storedState = req.cookies?.tiktok_oauth_state;
+    const state = cleanState(rawState);
+    const storedState = cleanState(req.cookies?.tiktok_oauth_state);
     const authPage = req.cookies?.tiktok_auth_page;
 
     const path =
@@ -298,7 +299,13 @@ async function webRedirection(req, res) {
 }
 
 function mobileRedirection(req, res) {
-  const { code, state, error, error_description: errorDescription } = req.query;
+  const {
+    code,
+    state: rawState,
+    error,
+    error_description: errorDescription,
+  } = req.query;
+  const state = cleanState(rawState);
 
   const callbackParams = new URLSearchParams();
 
@@ -451,4 +458,11 @@ function generateRandomState(length = 64) {
     randomValues,
     (byte) => charset[byte % charset.length],
   ).join("");
+}
+
+function cleanState(state) {
+  if (typeof state !== "string") {
+    return state;
+  }
+  return state.replace(/^(web|mobile)\./, "");
 }
