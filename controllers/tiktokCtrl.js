@@ -6,7 +6,7 @@ const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
 const WEB_APP_URL = process.env.WEB_APP_URL ?? "http://localhost:4200";
 
-const REDIRECT_URI = `https://kickchat-server-production.vercel.app/auth/tiktok/web/callback`;
+const REDIRECT_URI = `https://kickchat-server-production.vercel.app/auth/tiktok/callback`;
 
 module.exports = {
   async checkIfTikTokUserExists(req, res) {
