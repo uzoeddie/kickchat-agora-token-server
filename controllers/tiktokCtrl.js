@@ -32,139 +32,24 @@ module.exports = {
   },
 
   tikTokRedirect(req, res) {
-    const {
-      code,
-      state,
-      error,
-      error_description: errorDescription,
-    } = req.query;
+    const { state } = req.query;
 
-    const callbackParams = new URLSearchParams();
+    const platform = typeof state === "string" && state.startsWith("mobile.")
+    ? "mobile"
+    : "web";
 
-    if (code) {
-      callbackParams.set("code", code);
+    if (platform === "mobile") {
+      return mobileRedirection(req, res);
     }
 
-    if (state) {
-      callbackParams.set("state", state);
-    }
-
-    if (error) {
-      callbackParams.set("error", error);
-    }
-
-    if (errorDescription) {
-      callbackParams.set("error_description", errorDescription);
-    }
-
-    const appCallbackUrl = `kickchat://auth/tiktok/callback?${callbackParams.toString()}`;
-
-    const safeCallbackUrl = appCallbackUrl
-      .replaceAll("&", "&amp;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
-
-    return res.status(200).send(`
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1"
-        />
-
-        <title>Return to KickChat</title>
-
-        <style>
-          * {
-            box-sizing: border-box;
-          }
-
-          body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background: #f1f2f6;
-            color: #242a37;
-            font-family: Arial, sans-serif;
-          }
-
-          .card {
-            width: 100%;
-            max-width: 420px;
-            padding: 32px 24px;
-            background: #ffffff;
-            border-radius: 18px;
-            text-align: center;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
-          }
-
-          p {
-            color: #616775;
-            line-height: 1.5;
-          }
-
-          .button {
-            display: block;
-            margin-top: 24px;
-            padding: 15px 20px;
-            border-radius: 10px;
-            background: #2196f3;
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: 700;
-          }
-        </style>
-      </head>
-
-      <body>
-        <main class="card">
-          <h1>Return to KickChat</h1>
-
-          ${
-            error
-              ? `
-                <p>
-                  TikTok login could not be completed.
-                  Return to KickChat to try again.
-                </p>
-              `
-              : `
-                <p>
-                  TikTok login was successful.
-                  Continue in the KickChat app.
-                </p>
-              `
-          }
-
-          <a class="button" href="${safeCallbackUrl}">
-            Open KickChat
-          </a>
-        </main>
-
-        <script>
-          const appCallbackUrl = ${JSON.stringify(appCallbackUrl)};
-
-          // Attempt to open KickChat automatically.
-          window.setTimeout(() => {
-            window.location.href = appCallbackUrl;
-          }, 300);
-        </script>
-      </body>
-    </html>
-  `);
+    return webRedirection(req, res);
   },
 
   async tikTokWebAuthorization(req, res) {
     try {
       const { page } = req.query;
-      const state = generateRandomState(24);
+      const rawState = generateRandomState(24);
+      const state = `web.${rawState}`;
       const authPage = page;
 
       res.cookie("tiktok_oauth_state", state, {
@@ -196,108 +81,6 @@ module.exports = {
       return res.redirect(
         `${WEB_APP_URL}/auth/${authPage}?tiktok_error=unknown`,
       );
-    }
-  },
-
-  async tikTokWebCallback(req, res) {
-    try {
-      const {
-        code,
-        state,
-        error,
-        error_description: errorDescription,
-      } = req.query;
-
-      const storedState = req.cookies?.tiktok_oauth_state;
-      const authPage = req.cookies?.tiktok_auth_page;
-
-      const path =
-        authPage === "settings/account"
-          ? "settings/account"
-          : `auth/${authPage}`;
-
-      if (error) {
-        return res.redirect(
-          `${WEB_APP_URL}/${path}?tiktok_error=${encodeURIComponent(error)}`,
-        );
-      }
-
-      if (!code) {
-        return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=missing_code`);
-      }
-
-      if (!state || !storedState || state !== storedState) {
-        return res.redirect(
-          `${WEB_APP_URL}/${path}?tiktok_error=invalid_state`,
-        );
-      }
-
-      res.clearCookie("tiktok_oauth_state");
-      res.clearCookie("tiktok_auth_page");
-
-      // Exchange authorization code
-      const tokenResponse = await fetch(
-        "https://open.tiktokapis.com/v2/oauth/token/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Cache-Control": "no-cache",
-          },
-          body: new URLSearchParams({
-            client_key: CLIENT_KEY,
-            client_secret: CLIENT_SECRET,
-            code,
-            grant_type: "authorization_code",
-            redirect_uri: REDIRECT_URI,
-          }),
-        },
-      );
-
-      const tokenData = await tokenResponse.json();
-
-      if (!tokenResponse.ok || tokenData.error) {
-        return res.redirect(
-          `${WEB_APP_URL}/${path}?tiktok_error=token_exchange`,
-        );
-      }
-
-      // Retrieve TikTok profile
-      const profileResponse = await fetch(
-        "https://open.tiktokapis.com/v2/user/info/" +
-          "?fields=open_id,display_name,avatar_url",
-        {
-          headers: {
-            Authorization: `Bearer ${tokenData.access_token}`,
-          },
-        },
-      );
-
-      const profileData = await profileResponse.json();
-
-      if (!profileResponse.ok || profileData.error?.code !== "ok") {
-        return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=profile`);
-      }
-
-      const profile = profileData.data?.user;
-
-      if (!profile?.open_id) {
-        return res.redirect(
-          `${WEB_APP_URL}/${path}?tiktok_error=invalid_profile`,
-        );
-      }
-
-      const callbackParams = new URLSearchParams();
-      callbackParams.set("tiktok_open_id", profile.open_id);
-      callbackParams.set("display_name", profile.display_name ?? null);
-      callbackParams.set("avatar_url", profile.avatar_url ?? null);
-      return res.redirect(
-        `${WEB_APP_URL}/${path}?exchange=${encodeURIComponent(
-          callbackParams.toString(),
-        )}`,
-      );
-    } catch (error) {
-      return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=unknown`);
     }
   },
 
@@ -416,6 +199,233 @@ module.exports = {
     }
   },
 };
+
+function webRedirection(req, res) {
+  try {
+    const {
+      code,
+      state,
+      error,
+      error_description: errorDescription,
+    } = req.query;
+
+    const storedState = req.cookies?.tiktok_oauth_state;
+    const authPage = req.cookies?.tiktok_auth_page;
+
+    const path =
+      authPage === "settings/account"
+        ? "settings/account"
+        : `auth/${authPage}`;
+
+    if (error) {
+      return res.redirect(
+        `${WEB_APP_URL}/${path}?tiktok_error=${encodeURIComponent(error)}`,
+      );
+    }
+
+    if (!code) {
+      return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=missing_code`);
+    }
+
+    if (!state || !storedState || state !== storedState) {
+      return res.redirect(
+        `${WEB_APP_URL}/${path}?tiktok_error=invalid_state`,
+      );
+    }
+
+    res.clearCookie("tiktok_oauth_state");
+    res.clearCookie("tiktok_auth_page");
+
+    // Exchange authorization code
+    const tokenResponse = await fetch(
+      "https://open.tiktokapis.com/v2/oauth/token/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Cache-Control": "no-cache",
+        },
+        body: new URLSearchParams({
+          client_key: CLIENT_KEY,
+          client_secret: CLIENT_SECRET,
+          code,
+          grant_type: "authorization_code",
+          redirect_uri: REDIRECT_URI,
+        }),
+      },
+    );
+
+    const tokenData = await tokenResponse.json();
+
+    if (!tokenResponse.ok || tokenData.error) {
+      return res.redirect(
+        `${WEB_APP_URL}/${path}?tiktok_error=token_exchange`,
+      );
+    }
+
+    // Retrieve TikTok profile
+    const profileResponse = await fetch(
+      "https://open.tiktokapis.com/v2/user/info/" +
+        "?fields=open_id,display_name,avatar_url",
+      {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      },
+    );
+
+    const profileData = await profileResponse.json();
+
+    if (!profileResponse.ok || profileData.error?.code !== "ok") {
+      return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=profile`);
+    }
+
+    const profile = profileData.data?.user;
+
+    if (!profile?.open_id) {
+      return res.redirect(
+        `${WEB_APP_URL}/${path}?tiktok_error=invalid_profile`,
+      );
+    }
+
+    const callbackParams = new URLSearchParams();
+    callbackParams.set("tiktok_open_id", profile.open_id);
+    callbackParams.set("display_name", profile.display_name ?? null);
+    callbackParams.set("avatar_url", profile.avatar_url ?? null);
+    return res.redirect(
+      `${WEB_APP_URL}/${path}?exchange=${encodeURIComponent(
+        callbackParams.toString(),
+      )}`,
+    );
+  } catch (error) {
+    return res.redirect(`${WEB_APP_URL}/${path}?tiktok_error=unknown`);
+  }
+};
+
+function mobileRedirection(req, res) {
+  const { code, state, error, error_description: errorDescription } = req.query;
+
+  const callbackParams = new URLSearchParams();
+
+  if (code) {
+    callbackParams.set("code", code);
+  }
+
+  if (state) {
+    callbackParams.set("state", state);
+  }
+
+  if (error) {
+    callbackParams.set("error", error);
+  }
+
+  if (errorDescription) {
+    callbackParams.set("error_description", errorDescription);
+  }
+
+  const appCallbackUrl = `kickchat://auth/tiktok/callback?${callbackParams.toString()}`;
+
+  const safeCallbackUrl = appCallbackUrl
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+
+  return res.status(200).send(`
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1"
+        />
+
+        <title>Return to KickChat</title>
+
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #f1f2f6;
+            color: #242a37;
+            font-family: Arial, sans-serif;
+          }
+
+          .card {
+            width: 100%;
+            max-width: 420px;
+            padding: 32px 24px;
+            background: #ffffff;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+          }
+
+          p {
+            color: #616775;
+            line-height: 1.5;
+          }
+
+          .button {
+            display: block;
+            margin-top: 24px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            background: #2196f3;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+          }
+        </style>
+      </head>
+
+      <body>
+        <main class="card">
+          <h1>Return to KickChat</h1>
+
+          ${
+            error
+              ? `
+                <p>
+                  TikTok login could not be completed.
+                  Return to KickChat to try again.
+                </p>
+              `
+              : `
+                <p>
+                  TikTok login was successful.
+                  Continue in the KickChat app.
+                </p>
+              `
+          }
+
+          <a class="button" href="${safeCallbackUrl}">
+            Open KickChat
+          </a>
+        </main>
+
+        <script>
+          const appCallbackUrl = ${JSON.stringify(appCallbackUrl)};
+
+          // Attempt to open KickChat automatically.
+          window.setTimeout(() => {
+            window.location.href = appCallbackUrl;
+          }, 300);
+        </script>
+      </body>
+    </html>
+  `);
+}
 
 async function getUserDocumentByTikTokId(tiktokId) {
   try {
