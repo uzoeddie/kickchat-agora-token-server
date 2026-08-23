@@ -54,6 +54,7 @@ module.exports = {
         userExist: data?.uid ? true : false,
       });
     } catch (error) {
+      console.log(error);
       if (error.code === "auth/user-not-found") {
         return res.status(200).json({
           message: "User email exist",
@@ -143,6 +144,7 @@ module.exports = {
       const otpCode = crypto.randomInt(10 ** 5, 10 ** 6 - 1);
       // Step 1 - save the otp to firestore database
       const phoneNumberDocID = phoneNumber.replace(/[^\w\s]/gi, "");
+      console.log(phoneNumberDocID, otpCode);
       await db.collection(PHONE_OTPS).doc(phoneNumberDocID).set({
         otp: otpCode,
       });
