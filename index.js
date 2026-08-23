@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
-const admin = require("firebase-admin");
+const { initializeApp, getApps, cert } = require("firebase-admin/app");
 const cors = require("cors");
 const fs = require("fs");
 const helmet = require("helmet");
@@ -13,7 +13,6 @@ const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary");
 const rateLimit = require("express-rate-limit");
 const { indexNonce } = require("./nounce");
-const { registerPollCron } = require("./cron/pollCron");
 
 const app = express();
 const server = http.createServer(app);
@@ -45,7 +44,6 @@ if (process.env.NODE_ENV === "development") {
   adminInitializeApp(serviceAccountData, "https://kickchat.firebaseio.com");
 }
 cloudinaryConfig();
-// registerPollCron();
 
 i18n.configure({
   locales: ["en", "es", "de", "it", "pt", "fr"],
@@ -139,9 +137,9 @@ server.listen(PORT, () => {
 });
 
 function adminInitializeApp(serviceAccountJson, databaseURL) {
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccountJson),
+  if (!getApps().length) {
+    initializeApp({
+      credential: cert(serviceAccountJson),
       databaseURL,
     });
   }

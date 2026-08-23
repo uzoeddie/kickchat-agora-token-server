@@ -1,10 +1,15 @@
 const fetch = require("node-fetch");
-const admin = require("firebase-admin");
 const auth = require("firebase-admin/auth");
+const { getFirestore } = require("firebase-admin/firestore");
+
+const db = getFirestore();
 
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
-const WEB_APP_URL = process.env.WEB_APP_URL ?? "http://localhost:4200";
+const WEB_APP_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://kickchatapp.com"
+    : "http://localhost:4200";
 
 const REDIRECT_URI = `https://kickchat-server-production.vercel.app/auth/tiktok/callback`;
 
@@ -431,8 +436,7 @@ function mobileRedirection(req, res) {
 
 async function getUserDocumentByTikTokId(tiktokId) {
   try {
-    const snapshot = await admin
-      .firestore()
+    const snapshot = await db
       .collection("users")
       .where("tiktokId", "==", tiktokId)
       .limit(1)
