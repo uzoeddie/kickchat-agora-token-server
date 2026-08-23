@@ -35,8 +35,5 @@
     "openai": "^7.4.0",
     "pm2": "^7.0.3",
     "serve-favicon": "^2.5.1"
-  },
-  "overrides": {
-    "jose": "^4.15.5"
   }
 }
